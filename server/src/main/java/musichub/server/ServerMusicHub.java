@@ -1,6 +1,16 @@
-package musichub.business;
+package musichub.server;
 
 import java.util.*;
+
+import musichub.business.Album;
+import musichub.business.AudioBook;
+import musichub.business.AudioElement;
+import musichub.business.IMusicHub;
+import musichub.business.NoAlbumFoundException;
+import musichub.business.NoElementFoundException;
+import musichub.business.NoPlayListFoundException;
+import musichub.business.PlayList;
+import musichub.business.Song;
 import musichub.util.*;
 import org.w3c.dom.*;
 
@@ -25,7 +35,7 @@ class SortByAuthor implements Comparator<AudioElement>
 	} 
 }
 	
-public class MusicHub {
+public class ServerMusicHub implements IMusicHub {
 	private List<Album> albums;
 	private List<PlayList> playlists;
 	private List<AudioElement> elements;
@@ -37,7 +47,7 @@ public class MusicHub {
 	
 	private XMLHandler xmlHandler = new XMLHandler();
 	
-	public MusicHub () {
+	public ServerMusicHub () {
 		albums = new LinkedList<Album>();
 		playlists = new LinkedList<PlayList>();
 		elements = new LinkedList<AudioElement>();
@@ -277,6 +287,12 @@ public class MusicHub {
 				}
 			}  
 		}
+	}
+	
+	public void save () {
+		this.saveElements();
+		this.saveAlbums();
+		this.savePlayLists();
 	}
 
 
