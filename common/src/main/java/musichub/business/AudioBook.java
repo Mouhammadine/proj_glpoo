@@ -3,10 +3,19 @@ package musichub.business;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.UUID;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class AudioBook extends AudioElement {
 	private Language language;
 	private Category category;
-	
+
+	public AudioBook () {
+		super("", "", 0, UUID.randomUUID().toString(), "");
+	}
+
 	public AudioBook (String title, String artist, int lengthInSeconds, String uid, String content, String language, String category) {
 		super (title, artist, lengthInSeconds, uid, content);
 		this.setLanguage(language);

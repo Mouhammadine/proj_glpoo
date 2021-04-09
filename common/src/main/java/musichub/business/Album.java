@@ -1,11 +1,18 @@
 package musichub.business;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
-import org.w3c.dom.*;
-import java.text.*;
 
-
-
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Album {
 	private String title;
 	private String artist;
@@ -14,7 +21,14 @@ public class Album {
 	private Date date;
 	private ArrayList<UUID> songsUIDs;
 
-	public Album (String title, String artist, int lengthInSeconds, String id, String date, ArrayList<UUID> songsUIDs) {
+	public Album() {
+		title = "";
+		artist = "";
+		uuid = UUID.randomUUID();
+		date = Date.from(Instant.MIN);
+	}
+
+	public Album(String title, String artist, int lengthInSeconds, String id, String date, ArrayList<UUID> songsUIDs) {
 		this.title = title;
 		this.artist = artist;
 		this.lengthInSeconds = lengthInSeconds;

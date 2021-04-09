@@ -1,11 +1,20 @@
 package musichub.business;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.UUID;
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Song extends AudioElement {
 	private Genre genre;
-	
+
+	public Song() {
+		super("", "", 0, UUID.randomUUID().toString(), "");
+	}
+
 	public Song (String title, String artist, int length, String uid, String content, String genre) {
 		super (title, artist, length, uid, content);
 		this.setGenre(genre);

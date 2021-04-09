@@ -7,6 +7,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.xml.sax.SAXException;
 
 import org.w3c.dom.*;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 
@@ -64,11 +66,11 @@ public class XMLHandler {
 			
 			elementNodes = root.getChildNodes();	
 		}
-		catch (SAXException e) 
+		catch (FileNotFoundException e)
 		{
-			e.printStackTrace();
+			System.err.format("XML file not found: %s\n", filePath);
 		}
-		catch (IOException e) 
+		catch (SAXException | IOException e)
 		{
 			e.printStackTrace();
 		}

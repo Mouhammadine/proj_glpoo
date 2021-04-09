@@ -1,15 +1,24 @@
 package musichub.business;
 
-import java.util.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import java.util.UUID;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlSeeAlso({
+	AudioBook.class, Song.class
+})
 public abstract class AudioElement {
 	protected String  	title;
 	protected String 	artist;
 	protected int    	lengthInSeconds;
 	protected UUID    	uuid;
 	protected String	content;
-	
+
 	public AudioElement (String title, String artist, int lengthInSeconds, String id, String content) {
 		this.title = title;
 		this.artist = artist;

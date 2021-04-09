@@ -1,30 +1,21 @@
 package musichub.main;
-import java.util.Iterator;
+import musichub.business.*;
+
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
-import musichub.business.Album;
-import musichub.business.AudioBook;
-import musichub.business.AudioElement;
-import musichub.business.IMusicHub;
-import musichub.business.NoAlbumFoundException;
-import musichub.business.NoElementFoundException;
-import musichub.business.NoPlayListFoundException;
-import musichub.business.PlayList;
-import musichub.business.Song;
-
 public class MusicTerminal
 {
-	private IMusicHub hub;
+	private final IMusicHub hub;
 	private Scanner scan;
 	private boolean should_quit;
 
-	private LinkedHashMap<Character, Command> commands;
+	private final LinkedHashMap<Character, Command> commands;
 
 	/**
 	 * Create a new Music Terminal from a hub
-	 * @param hub The hub (can be a client or a server)
+	 * @param hubInput The hub (can be a client or a server)
 	 * @param isServer If isServer is true, add the commands specific to server, otherwise commands specific to client
 	 */
 	public MusicTerminal(IMusicHub hubInput, boolean isServer) {
@@ -86,6 +77,14 @@ public class MusicTerminal
 			}
 		});
 
+		this.registerCommand(new Command('m', "display all songs/audiobooks titles") {
+			@Override
+			public void run() {
+				for (AudioElement el : hub.elements())
+					System.out.println(el.getTitle());
+			}
+		});
+
 		this.registerCommand(new Command('c', "add a new song") {
 			@Override
 			public void run() {
@@ -101,8 +100,8 @@ public class MusicTerminal
 				hub.addElement(s);
 
 				System.out.println("New element list: ");
-				Iterator<AudioElement> it = hub.elements();
-				while (it.hasNext()) System.out.println(it.next().getTitle());
+				for (AudioElement el : hub.elements())
+					System.out.println(el.getTitle());
 
 				System.out.println("Song created!");
 			}
@@ -120,8 +119,10 @@ public class MusicTerminal
 				Album a = new Album(aTitle, aArtist, aLength, aDate);
 				hub.addAlbum(a);
 				System.out.println("New list of albums: ");
-				Iterator<Album> ita = hub.albums();
-				while (ita.hasNext()) System.out.println(ita.next().getTitle());
+
+				for (Album el : hub.albums())
+					System.out.println(el.getTitle());
+
 				System.out.println("Album created!");
 			}
 		});
@@ -132,28 +133,24 @@ public class MusicTerminal
 				//add a song to an album:
 				System.out.println("Add an existing song to an existing album");
 				System.out.println("Type the name of the song you wish to add. Available songs: ");
-				Iterator<AudioElement> itae = hub.elements();
-				while (itae.hasNext()) {
-					AudioElement ae = itae.next();
-					if ( ae instanceof Song) System.out.println(ae.getTitle());
-				}
-				String songTitle = prompt("Song name: ");	
+
+				for (AudioElement ae : hub.elements())
+					if (ae instanceof Song)
+						System.out.println(ae.getTitle());
+
+				String songTitle = prompt("Song name: ");
 
 				System.out.println("Type the name of the album you wish to enrich. Available albums: ");
-				Iterator<Album> ait = hub.albums();
-				while (ait.hasNext()) {
-					Album al = ait.next();
-					System.out.println(al.getTitle());
-				}
+				for (Album el : hub.albums())
+					System.out.println(el.getTitle());
+
 				String titleAlbum = prompt("Album name: ");
 				try {
 					hub.addElementToAlbum(songTitle, titleAlbum);
-				} catch (NoAlbumFoundException ex){
-					System.out.println (ex.getMessage());
-				} catch (NoElementFoundException ex){
+					System.out.println("Song added to the album!");
+				} catch (NoAlbumFoundException | NoElementFoundException ex){
 					System.out.println (ex.getMessage());
 				}
-				System.out.println("Song added to the album!");
 			}
 		});
 
@@ -171,8 +168,9 @@ public class MusicTerminal
 				AudioBook b = new AudioBook (bTitle, bArtist, bLength, bContent, bLanguage, bCategory);
 				hub.addElement(b);
 				System.out.println("Audiobook created! New element list: ");
-				Iterator<AudioElement> itl = hub.elements();
-				while (itl.hasNext()) System.out.println(itl.next().getTitle());
+
+				for (AudioElement el : hub.elements())
+					System.out.println(el.getTitle());
 			}
 		});
 
@@ -182,29 +180,24 @@ public class MusicTerminal
 				//create a new playlist from existing elements
 				System.out.println("Add an existing song or audiobook to a new playlist");
 				System.out.println("Existing playlists:");
-				Iterator<PlayList> itpl = hub.playlists();
-				while (itpl.hasNext()) {
-					PlayList pl = itpl.next();
+
+				for (PlayList pl : hub.playlists())
 					System.out.println(pl.getTitle());
-				}
-				String playListTitle = prompt("Type the name of the playlist you wish to create:");	
+
+				String playListTitle = prompt("Type the name of the playlist you wish to create:");
 				PlayList pl = new PlayList(playListTitle);
 				hub.addPlaylist(pl);
 				System.out.println("Available elements: ");
 
-				Iterator<AudioElement> itael = hub.elements();
-				while (itael.hasNext()) {
-					AudioElement ae = itael.next();
+				for (AudioElement ae : hub.elements())
 					System.out.println(ae.getTitle());
-				}
+
 				String choice;
 				do {
 					String elementTitle = prompt("Type the name of the audio element you wish to add or 'n' to exit: ");	
 					try {
 						hub.addElementToPlayList(elementTitle, playListTitle);
-					} catch (NoPlayListFoundException ex) {
-						System.out.println (ex.getMessage());
-					} catch (NoElementFoundException ex) {
+					} catch (NoPlayListFoundException | NoElementFoundException ex) {
 						System.out.println (ex.getMessage());
 					}
 
@@ -220,12 +213,11 @@ public class MusicTerminal
 			public void run() {
 				//delete a playlist
 				System.out.println("Delete an existing playlist. Available playlists:");
-				Iterator<PlayList> itp = hub.playlists();
-				while (itp.hasNext()) {
-					PlayList p = itp.next();
+
+				for (PlayList p : hub.playlists())
 					System.out.println(p.getTitle());
-				}
-				String plTitle = prompt("Playlist name: ");	
+
+				String plTitle = prompt("Playlist name: ");
 				try {
 					hub.deletePlayList(plTitle);
 				}	catch (NoPlayListFoundException ex) {
@@ -274,7 +266,7 @@ public class MusicTerminal
 			if (commands.containsKey(choice.charAt(0))) {
 				commands.get(choice.charAt(0)).run();
 			} else {
-				System.out.println("Unknow command. Type h for help");
+				System.out.println("Unknown command. Type h for help");
 			}
 
 		} while (!this.should_quit);

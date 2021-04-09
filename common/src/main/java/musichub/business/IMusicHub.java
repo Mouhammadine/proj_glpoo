@@ -1,34 +1,37 @@
 package musichub.business;
 
-import java.util.Iterator;
-import java.util.List;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+import java.util.ArrayList;
 
+@WebService
+@SOAPBinding(style = SOAPBinding.Style.RPC)
 public interface IMusicHub {
-	public void addElement(AudioElement element);
-	
-	public void addAlbum(Album album);
-	
-	public void addPlaylist(PlayList playlist);
-	
-	public void deletePlayList(String playListTitle) throws NoPlayListFoundException;
-	
-	public Iterator<Album> albums();
-	
-	public Iterator<PlayList> playlists();
-	
-	public Iterator<AudioElement> elements();
-	
-	public String getAlbumsTitlesSortedByDate();
-	
-	public String getAudiobooksTitlesSortedByAuthor();
+	@WebMethod void addElement(AudioElement element);
 
-	public List<AudioElement> getAlbumSongs (String albumTitle) throws NoAlbumFoundException;
-	
-	public List<Song> getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException;
+	@WebMethod void addAlbum(Album album);
 
-	public void addElementToAlbum(String elementTitle, String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
-	
-	public void addElementToPlayList(String elementTitle, String playListTitle) throws NoPlayListFoundException, NoElementFoundException;
-	
-	public void save();
+	@WebMethod void addPlaylist(PlayList playlist);
+
+	@WebMethod void deletePlayList(String playListTitle) throws NoPlayListFoundException;
+
+	@WebMethod Album[] albums();
+
+	@WebMethod PlayList[] playlists();
+	@WebMethod AudioElement[] elements();
+
+	@WebMethod String getAlbumsTitlesSortedByDate();
+
+	@WebMethod String getAudiobooksTitlesSortedByAuthor();
+
+	@WebMethod ArrayList<AudioElement> getAlbumSongs (String albumTitle) throws NoAlbumFoundException;
+
+	@WebMethod ArrayList<Song> getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException;
+
+	@WebMethod void addElementToAlbum(String elementTitle, String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
+
+	@WebMethod void addElementToPlayList(String elementTitle, String playListTitle) throws NoPlayListFoundException, NoElementFoundException;
+
+	@WebMethod void save();
 }

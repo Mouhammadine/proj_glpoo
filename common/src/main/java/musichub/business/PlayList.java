@@ -1,8 +1,17 @@
 package musichub.business;
 
-import java.util.*;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.UUID;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PlayList {
 	private String title;
 	private UUID uuid;
@@ -19,7 +28,11 @@ public class PlayList {
 		this.uuid = UUID.randomUUID();
 		this.elementUUIDs = new ArrayList<UUID>();
 	}
-	
+
+	public PlayList () {
+	    this("");
+	}
+
 	public void addElement (UUID element)
 	{
 		elementUUIDs.add(element);
