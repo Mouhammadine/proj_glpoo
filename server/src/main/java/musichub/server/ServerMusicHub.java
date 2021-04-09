@@ -1,18 +1,14 @@
 package musichub.server;
 
-import java.util.*;
+import musichub.business.*;
+import musichub.util.XMLHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import musichub.business.Album;
-import musichub.business.AudioBook;
-import musichub.business.AudioElement;
-import musichub.business.IMusicHub;
-import musichub.business.NoAlbumFoundException;
-import musichub.business.NoElementFoundException;
-import musichub.business.NoPlayListFoundException;
-import musichub.business.PlayList;
-import musichub.business.Song;
-import musichub.util.*;
-import org.w3c.dom.*;
+import javax.jws.WebService;
+import java.util.*;
 
 class SortByDate implements Comparator<Album>
 {
@@ -34,93 +30,99 @@ class SortByAuthor implements Comparator<AudioElement>
 			return e1.getArtist().compareTo(e2.getArtist());
 	} 
 }
-	
+
+@WebService(endpointInterface = "musichub.business.IMusicHub")
 public class ServerMusicHub implements IMusicHub {
-	private List<Album> albums;
-	private List<PlayList> playlists;
-	private List<AudioElement> elements;
-	
+	private final LinkedList<Album> albums;
+	private final LinkedList<PlayList> playlists;
+	private final LinkedList<AudioElement> elements;
+
 	public static final String DIR = System.getProperty("user.dir");
 	public static final String ALBUMS_FILE_PATH = DIR + "\\files\\albums.xml";
 	public static final String PLAYLISTS_FILE_PATH = DIR + "\\files\\playlists.xml";
 	public static final String ELEMENTS_FILE_PATH = DIR + "\\files\\elements.xml";
-	
-	private XMLHandler xmlHandler = new XMLHandler();
-	
+
+	private final XMLHandler xmlHandler = new XMLHandler();
+
 	public ServerMusicHub () {
-		albums = new LinkedList<Album>();
-		playlists = new LinkedList<PlayList>();
-		elements = new LinkedList<AudioElement>();
+		albums = new LinkedList<>();
+		playlists = new LinkedList<>();
+		elements = new LinkedList<>();
+
 		this.loadElements();
 		this.loadAlbums();
 		this.loadPlaylists();
 	}
-	
+
 	public void addElement(AudioElement element) {
 		elements.add(element);
 	}
-	
+
 	public void addAlbum(Album album) {
 		albums.add(album);
 	}
-	
+
 	public void addPlaylist(PlayList playlist) {
 		playlists.add(playlist);
 	}
-	
+
 	public void deletePlayList(String playListTitle) throws NoPlayListFoundException {
-		
+
 		PlayList thePlayList = null;
 		boolean result = false;
 		for (PlayList pl : playlists) {
-			if (pl.getTitle().toLowerCase().equals(playListTitle.toLowerCase())) {
+			if (pl.getTitle().equalsIgnoreCase(playListTitle)) {
 				thePlayList = pl;
 				break;
 			}
 		}
-		
-		if (thePlayList != null)  		
+
+		if (thePlayList != null)
 			result = playlists.remove(thePlayList); 
 		if (!result) throw new NoPlayListFoundException("Playlist " + playListTitle + " not found!");
 	}
-	
-	public Iterator<Album> albums() { 
-		return albums.listIterator();
+
+	public Album[] albums() {
+		return albums.toArray(new Album[0]);
 	}
-	
-	public Iterator<PlayList> playlists() { 
-		return playlists.listIterator();
+
+	public PlayList	[] playlists() {
+		return playlists.toArray(new PlayList[0]);
 	}
-	
-	public Iterator<AudioElement> elements() { 
-		return elements.listIterator();
+
+	public AudioElement[] elements() {
+		return elements.toArray(new AudioElement[0]);
 	}
-	
+
+	public AudioElement oneElement() {
+		return elements.get(0);
+	}
+
 	public String getAlbumsTitlesSortedByDate() {
-		StringBuffer titleList = new StringBuffer();
-		Collections.sort(albums, new SortByDate());
+		StringBuilder titleList = new StringBuilder();
+		albums.sort(new SortByDate());
 		for (Album al : albums)
-			titleList.append(al.getTitle()+ "\n");
-		return titleList.toString();
-	}
-	
-	public String getAudiobooksTitlesSortedByAuthor() {
-		StringBuffer titleList = new StringBuffer();
-		List<AudioElement> audioBookList = new ArrayList<AudioElement>();
-		for (AudioElement ae : elements)
-				if (ae instanceof AudioBook)
-					audioBookList.add(ae);
-		Collections.sort(audioBookList, new SortByAuthor());
-		for (AudioElement ab : audioBookList)
-			titleList.append(ab.getArtist()+ "\n");
+			titleList.append(al.getTitle()).append("\n");
 		return titleList.toString();
 	}
 
-	public List<AudioElement> getAlbumSongs (String albumTitle) throws NoAlbumFoundException {
+	public String getAudiobooksTitlesSortedByAuthor() {
+		StringBuilder titleList = new StringBuilder();
+		List<AudioElement> audioBookList = new ArrayList<>();
+		for (AudioElement ae : elements)
+			if (ae instanceof AudioBook)
+				audioBookList.add(ae);
+		audioBookList.sort(new SortByAuthor());
+		for (AudioElement ab : audioBookList)
+			titleList.append(ab.getArtist()).append("\n");
+		return titleList.toString();
+	}
+
+	public ArrayList<AudioElement> getAlbumSongs (String albumTitle) throws NoAlbumFoundException {
 		Album theAlbum = null;
-		ArrayList<AudioElement> songsInAlbum = new ArrayList<AudioElement>();
+		ArrayList<AudioElement> songsInAlbum = new ArrayList<>();
 		for (Album al : albums) {
-			if (al.getTitle().toLowerCase().equals(albumTitle.toLowerCase())) {
+			if (al.getTitle().equalsIgnoreCase(albumTitle)) {
 				theAlbum = al;
 				break;
 			}
@@ -134,15 +136,15 @@ public class ServerMusicHub implements IMusicHub {
 					if (el.getUUID().equals(id)) songsInAlbum.add(el);
 				}
 			}
-		return songsInAlbum;		
-		
+		return songsInAlbum;
+
 	}
-	
-	public List<Song> getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException {
+
+	public ArrayList<Song> getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException {
 		Album theAlbum = null;
-		ArrayList<Song> songsInAlbum = new ArrayList<Song>();
+		ArrayList<Song> songsInAlbum = new ArrayList<>();
 		for (Album al : albums) {
-			if (al.getTitle().toLowerCase().equals(albumTitle.toLowerCase())) {
+			if (al.getTitle().equalsIgnoreCase(albumTitle)) {
 				theAlbum = al;
 				break;
 			}
@@ -156,28 +158,29 @@ public class ServerMusicHub implements IMusicHub {
 					if (el.getUUID().equals(id)) songsInAlbum.add((Song)el);
 				}
 			}
-		Collections.sort(songsInAlbum, new SortByGenre());
-		return songsInAlbum;		
-		
+		songsInAlbum.sort(new SortByGenre());
+		return songsInAlbum;
+
 	}
 
 	public void addElementToAlbum(String elementTitle, String albumTitle) throws NoAlbumFoundException, NoElementFoundException
 	{
 		Album theAlbum = null;
 		int i = 0;
-		boolean found = false; 
-		for (i = 0; i < albums.size(); i++) {
-			if (albums.get(i).getTitle().toLowerCase().equals(albumTitle.toLowerCase())) {
+		boolean found = false;
+
+		for (; i < albums.size(); i++) {
+			if (albums.get(i).getTitle().equalsIgnoreCase(albumTitle)) {
 				theAlbum = albums.get(i);
 				found = true;
 				break;
 			}
 		}
 
-		if (found == true) {
+		if (found) {
 			AudioElement theElement = null;
 			for (AudioElement ae : elements) {
-				if (ae.getTitle().toLowerCase().equals(elementTitle.toLowerCase())) {
+				if (ae.getTitle().equalsIgnoreCase(elementTitle)) {
 					theElement = ae;
 					break;
 				}
@@ -190,27 +193,27 @@ public class ServerMusicHub implements IMusicHub {
             else throw new NoElementFoundException("Element " + elementTitle + " not found!");
 		}
 		else throw new NoAlbumFoundException("Album " + albumTitle + " not found!");
-		
+
 	}
-	
+
 	public void addElementToPlayList(String elementTitle, String playListTitle) throws NoPlayListFoundException, NoElementFoundException
 	{
 		PlayList thePlaylist = null;
         int i = 0;
 		boolean found = false; 
-		
-        for (i = 0; i < playlists.size(); i++) {
-			if (playlists.get(i).getTitle().toLowerCase().equals(playListTitle.toLowerCase())) {
+
+        for (; i < playlists.size(); i++) {
+			if (playlists.get(i).getTitle().equalsIgnoreCase(playListTitle)) {
 				thePlaylist = playlists.get(i);
 				found = true;
 				break;
 			}
 		}
 
-		if (found == true) {
+		if (found) {
 			AudioElement theElement = null;
 			for (AudioElement ae : elements) {
-				if (ae.getTitle().toLowerCase().equals(elementTitle.toLowerCase())) {
+				if (ae.getTitle().equalsIgnoreCase(elementTitle)) {
 					theElement = ae;
 					break;
 				}
@@ -221,15 +224,15 @@ public class ServerMusicHub implements IMusicHub {
                 playlists.set(i,thePlaylist);
             }
             else throw new NoElementFoundException("Element " + elementTitle + " not found!");
-			
+
 		} else throw new NoPlayListFoundException("Playlist " + playListTitle + " not found!");
-		
+
 	}
-	
+
 	private void loadAlbums () {
 		NodeList albumNodes = xmlHandler.parseXMLFile(ALBUMS_FILE_PATH);
 		if (albumNodes == null) return;
-				
+
 		for (int i = 0; i < albumNodes.getLength(); i++) {
 			if (albumNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
 				Element albumElement = (Element) albumNodes.item(i);
@@ -243,11 +246,11 @@ public class ServerMusicHub implements IMusicHub {
 			}  
 		}
 	}
-	
+
 	private void loadPlaylists () {
 		NodeList playlistNodes = xmlHandler.parseXMLFile(PLAYLISTS_FILE_PATH);
 		if (playlistNodes == null) return;
-		
+
 		for (int i = 0; i < playlistNodes.getLength(); i++) {
 			if (playlistNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
 				Element playlistElement = (Element) playlistNodes.item(i);
@@ -261,11 +264,11 @@ public class ServerMusicHub implements IMusicHub {
 			}  
 		}
 	}
-	
+
 	private void loadElements () {
 		NodeList audioelementsNodes = xmlHandler.parseXMLFile(ELEMENTS_FILE_PATH);
 		if (audioelementsNodes == null) return;
-		
+
 		for (int i = 0; i < audioelementsNodes.getLength(); i++) {
 			if (audioelementsNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
 				Element audioElement = (Element) audioelementsNodes.item(i);
@@ -288,7 +291,7 @@ public class ServerMusicHub implements IMusicHub {
 			}  
 		}
 	}
-	
+
 	public void save () {
 		this.saveElements();
 		this.saveAlbums();
@@ -299,35 +302,33 @@ public class ServerMusicHub implements IMusicHub {
 	public void saveAlbums () {
 		Document document = xmlHandler.createXMLDocument();
 		if (document == null) return;
-		
+
 		// root element
 		Element root = document.createElement("albums");
 		document.appendChild(root);
 
 		//save all albums
-		for (Iterator<Album> albumsIter = this.albums(); albumsIter.hasNext();) {
-			Album currentAlbum = albumsIter.next();
+		for (Album currentAlbum : this.albums()) {
 			currentAlbum.createXMLElement(document, root);
 		}
 		xmlHandler.createXMLFile(document, ALBUMS_FILE_PATH);
 	}
-	
+
 	public void savePlayLists () {
 		Document document = xmlHandler.createXMLDocument();
 		if (document == null) return;
-		
+
 		// root element
 		Element root = document.createElement("playlists");
 		document.appendChild(root);
 
 		//save all playlists
-		for (Iterator<PlayList> playlistsIter = this.playlists(); playlistsIter.hasNext();) {
-			PlayList currentPlayList = playlistsIter.next();
+        for (PlayList currentPlayList : this.playlists()) {
 			currentPlayList.createXMLElement(document, root);
 		}
 		xmlHandler.createXMLFile(document, PLAYLISTS_FILE_PATH);
 	}
-	
+
 	public void saveElements() {
 		Document document = xmlHandler.createXMLDocument();
 		if (document == null) return;
@@ -337,19 +338,14 @@ public class ServerMusicHub implements IMusicHub {
 		document.appendChild(root);
 
 		//save all AudioElements
-		Iterator<AudioElement> elementsIter = elements.listIterator(); 
-		while (elementsIter.hasNext()) {
-			
-			AudioElement currentElement = elementsIter.next();
-			if (currentElement instanceof Song)
-			{
-				((Song)currentElement).createXMLElement(document, root);
+		for (AudioElement currentElement : elements) {
+			if (currentElement instanceof Song) {
+				currentElement.createXMLElement(document, root);
 			}
-			if (currentElement instanceof AudioBook)
-			{ 
-				((AudioBook)currentElement).createXMLElement(document, root);
+			if (currentElement instanceof AudioBook) {
+				currentElement.createXMLElement(document, root);
 			}
 		}
 		xmlHandler.createXMLFile(document, ELEMENTS_FILE_PATH);
- 	}	
+ 	}
 }
