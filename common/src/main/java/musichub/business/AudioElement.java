@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import java.io.File;
 import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -56,7 +57,11 @@ public abstract class AudioElement {
 			throw ex;
 		}
 	}
-	
+
+	public File getDataLocation() {
+		return new File(this.content);
+	}
+
 	public UUID getUUID() {
 		return this.uuid;
 	}

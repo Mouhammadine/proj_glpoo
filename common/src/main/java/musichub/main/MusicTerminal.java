@@ -1,12 +1,21 @@
 package musichub.main;
+
 import musichub.business.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/**
+ * Interactive TTY application for MusicHub
+ * This class is agnostic from the backend and can be used for client & server
+ */
 public class MusicTerminal
 {
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
 	private final IMusicHub hub;
 	private Scanner scan;
 	private boolean should_quit;
@@ -44,9 +53,10 @@ public class MusicTerminal
 				System.out.println("Songs of an album sorted by genre will be displayed; enter the album name, available albums are:");
 				System.out.println(hub.getAlbumsTitlesSortedByDate());
 
-				String albumTitle = prompt("Title: ");
+				String albumTitle = prompt("Album name: ");
 				try {
-					System.out.println(hub.getAlbumSongsSortedByGenre(albumTitle));
+					for (Song s : hub.getAlbumSongsSortedByGenre(albumTitle))
+						System.out.println(s);
 				} catch (NoAlbumFoundException ex) {
 					System.out.println("No album found with the requested title " + ex.getMessage());
 				}
@@ -57,12 +67,13 @@ public class MusicTerminal
 			@Override
 			public void run() {
 				//songs of an album
-				System.out.println("Songs of an album will be displayed; enter the album name, available albums are:");
+				System.out.println("Available albums:");
 				System.out.println(hub.getAlbumsTitlesSortedByDate());
 
-				String albumTitle = prompt("Title: ");
+				String albumTitle = prompt("Album name: ");
 				try {
-					System.out.println(hub.getAlbumSongs(albumTitle));
+					for (Song s : hub.getAlbumSongs(albumTitle))
+						System.out.println(s);
 				} catch (NoAlbumFoundException ex) {
 					System.out.println("No album found with the requested title " + ex.getMessage());
 				}
@@ -91,12 +102,12 @@ public class MusicTerminal
 				// add a new song
 				System.out.println("---- New song ----");
 				String title = prompt("Song title: ");
-				String genre = prompt("Song genre (jazz, classic, hiphop, rock, pop, rap):");
+				String genre = prompt("Song genre (jazz, classic, hiphop, rock, pop, rap): ");
 				String artist = prompt("Song artist: ");
-				int length = Integer.parseInt(prompt("Song length in seconds: "));
+				int length = prompt_uint("Song length in seconds: ");
 				String content = prompt("Song content: ");
 
-				Song s = new Song (title, artist, length, content, genre);
+				Song s = new Song(title, artist, length, content, genre);
 				hub.addElement(s);
 
 				System.out.println("New element list: ");
@@ -114,8 +125,8 @@ public class MusicTerminal
 				System.out.println("Enter a new album: ");
 				String aTitle = prompt("Album title: ");
 				String aArtist = prompt("Album artist: ");
-				int aLength = Integer.parseInt(prompt("Album length in seconds: "));
-				String aDate = prompt("Album date as YYYY-DD-MM: ");
+				int aLength = prompt_uint("Album length in seconds: ");
+				String aDate = prompt_date("Album date as YYYY-DD-MM: ");
 				Album a = new Album(aTitle, aArtist, aLength, aDate);
 				hub.addAlbum(a);
 				System.out.println("New list of albums: ");
@@ -292,6 +303,34 @@ public class MusicTerminal
 			System.out.println();
 			System.exit(0);
 			return "";
+		}
+	}
+
+	private int prompt_uint(String ps1) {
+		while (true) {
+			String value = prompt(ps1);
+
+			try {
+				int v = Integer.parseInt(value);
+				if (v >= 0)
+					return v;
+				System.out.println("Input should be a positive integer");
+			} catch (NumberFormatException e) {
+				System.out.println("Input isn't a valid integer!");
+			}
+		}
+	}
+
+	private String prompt_date(String ps1) {
+		while (true) {
+			String value = prompt(ps1);
+
+			try {
+				sdf.parse(value);
+				return value;
+			} catch (ParseException e) {
+				System.out.println("Input isn't a valid date! Example: 2021-01-31");
+			}
 		}
 	}
 

@@ -77,6 +77,5 @@ public class Song extends AudioElement {
         song.appendChild(genreElement);
 		
 		parentElement.appendChild(song);
-		return;
 	}
 }

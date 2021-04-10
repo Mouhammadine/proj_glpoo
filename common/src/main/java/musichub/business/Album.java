@@ -7,6 +7,8 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -14,19 +16,28 @@ import java.util.*;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Album {
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+	public static class DateAdapter extends XmlAdapter<String, Date> {
+		@Override
+		public String marshal(Date v) {
+			return new SimpleDateFormat(DATE_FORMAT).format(v);
+		}
+
+		@Override
+		public Date unmarshal(String v) throws ParseException {
+			return new SimpleDateFormat(DATE_FORMAT).parse(v);
+		}
+
+	}
+
 	private String title;
 	private String artist;
 	private int lengthInSeconds;
 	private UUID uuid;
+
+	@XmlJavaTypeAdapter(DateAdapter.class)
 	private Date date;
 	private ArrayList<UUID> songsUIDs;
-
-	public Album() {
-		title = "";
-		artist = "";
-		uuid = UUID.randomUUID();
-		date = Date.from(Instant.MIN);
-	}
 
 	public Album(String title, String artist, int lengthInSeconds, String id, String date, ArrayList<UUID> songsUIDs) {
 		this.title = title;
@@ -34,14 +45,14 @@ public class Album {
 		this.lengthInSeconds = lengthInSeconds;
 		this.uuid = UUID.fromString(id);
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 			this.date = sdf.parse(date);
 		} catch (ParseException ex) {
 			ex.printStackTrace();
 		}
 		this.songsUIDs = songsUIDs;
 	}
-	
+
 	public Album (String title, String artist, int lengthInSeconds, String date) {
 		this.title = title;
 		this.artist = artist;
@@ -53,9 +64,17 @@ public class Album {
 		} catch (ParseException ex) {
 			ex.printStackTrace();
 		}
-		this.songsUIDs = new ArrayList<UUID>();
+		this.songsUIDs = new ArrayList<>();
 	}
-	
+
+	public Album() {
+		title = "";
+		artist = "";
+		uuid = UUID.randomUUID();
+		date = Date.from(Instant.MIN);
+		songsUIDs = new ArrayList<>();
+	}
+
 	public Album (Element xmlElement) throws Exception {
 		try {
 			this.title = xmlElement.getElementsByTagName("title").item(0).getTextContent();

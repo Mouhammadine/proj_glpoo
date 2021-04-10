@@ -7,6 +7,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.jws.WebService;
 import java.util.*;
 
@@ -54,18 +56,22 @@ public class ServerMusicHub implements IMusicHub {
 		this.loadPlaylists();
 	}
 
+	@Override
 	public void addElement(AudioElement element) {
 		elements.add(element);
 	}
 
+	@Override
 	public void addAlbum(Album album) {
 		albums.add(album);
 	}
 
+	@Override
 	public void addPlaylist(PlayList playlist) {
 		playlists.add(playlist);
 	}
 
+	@Override
 	public void deletePlayList(String playListTitle) throws NoPlayListFoundException {
 
 		PlayList thePlayList = null;
@@ -82,22 +88,22 @@ public class ServerMusicHub implements IMusicHub {
 		if (!result) throw new NoPlayListFoundException("Playlist " + playListTitle + " not found!");
 	}
 
+	@Override
 	public Album[] albums() {
 		return albums.toArray(new Album[0]);
 	}
 
+	@Override
 	public PlayList	[] playlists() {
 		return playlists.toArray(new PlayList[0]);
 	}
 
+	@Override
 	public AudioElement[] elements() {
 		return elements.toArray(new AudioElement[0]);
 	}
 
-	public AudioElement oneElement() {
-		return elements.get(0);
-	}
-
+	@Override
 	public String getAlbumsTitlesSortedByDate() {
 		StringBuilder titleList = new StringBuilder();
 		albums.sort(new SortByDate());
@@ -106,6 +112,7 @@ public class ServerMusicHub implements IMusicHub {
 		return titleList.toString();
 	}
 
+	@Override
 	public String getAudiobooksTitlesSortedByAuthor() {
 		StringBuilder titleList = new StringBuilder();
 		List<AudioElement> audioBookList = new ArrayList<>();
@@ -118,115 +125,78 @@ public class ServerMusicHub implements IMusicHub {
 		return titleList.toString();
 	}
 
-	public ArrayList<AudioElement> getAlbumSongs (String albumTitle) throws NoAlbumFoundException {
-		Album theAlbum = null;
-		ArrayList<AudioElement> songsInAlbum = new ArrayList<>();
-		for (Album al : albums) {
-			if (al.getTitle().equalsIgnoreCase(albumTitle)) {
-				theAlbum = al;
-				break;
-			}
-		}
-		if (theAlbum == null) throw new NoAlbumFoundException("No album with this title in the MusicHub!");
+	@Override
+	public Song[] getAlbumSongs(String albumTitle) throws NoAlbumFoundException {
+		Album theAlbum = albumByTitle(albumTitle);
+		Song[] songsInAlbum = new Song[theAlbum.getSongs().size()];
 
 		List<UUID> songIDs = theAlbum.getSongs();
-		for (UUID id : songIDs)
+		for (int i = 0; i < songIDs.size(); i++) {
+			UUID id = songIDs.get(i);
 			for (AudioElement el : elements) {
-				if (el instanceof Song) {
-					if (el.getUUID().equals(id)) songsInAlbum.add(el);
-				}
-			}
-		return songsInAlbum;
-
-	}
-
-	public ArrayList<Song> getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException {
-		Album theAlbum = null;
-		ArrayList<Song> songsInAlbum = new ArrayList<>();
-		for (Album al : albums) {
-			if (al.getTitle().equalsIgnoreCase(albumTitle)) {
-				theAlbum = al;
-				break;
+				if ((el instanceof Song) && el.getUUID().equals(id))
+					songsInAlbum[i] = (Song) el;
 			}
 		}
-		if (theAlbum == null) throw new NoAlbumFoundException("No album with this title in the MusicHub!");
 
-		List<UUID> songIDs = theAlbum.getSongs();
-		for (UUID id : songIDs)
-			for (AudioElement el : elements) {
-				if (el instanceof Song) {
-					if (el.getUUID().equals(id)) songsInAlbum.add((Song)el);
-				}
-			}
-		songsInAlbum.sort(new SortByGenre());
 		return songsInAlbum;
-
 	}
 
+	@Override
+	public Song[] getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException {
+		Song[] songs = getAlbumSongs(albumTitle);
+		return Arrays.stream(songs)
+					 .sorted(new SortByGenre())
+				     .toArray(Song[]::new);
+	}
+
+	@Override
+	public Album albumByTitle(String title) throws NoAlbumFoundException {
+		for (Album e : albums) {
+			if (e.getTitle().equalsIgnoreCase(title))
+				return e;
+		}
+
+		throw new NoAlbumFoundException("Album " + title + " not found!");
+	}
+
+	@Override
+	public PlayList playlistByTitle(String title) throws NoPlayListFoundException {
+		for (PlayList e : playlists) {
+			if (e.getTitle().equalsIgnoreCase(title))
+				return e;
+		}
+		throw new NoPlayListFoundException("PlayList " + title + " not found!");
+	}
+
+	@Override
+	public AudioElement elementByTitle(String title) throws NoElementFoundException {
+		for (AudioElement ae : elements) {
+			if (ae.getTitle().equalsIgnoreCase(title))
+				return ae;
+		}
+		throw new NoElementFoundException("PlayList " + title + " not found!");
+	}
+
+	@Override
 	public void addElementToAlbum(String elementTitle, String albumTitle) throws NoAlbumFoundException, NoElementFoundException
 	{
-		Album theAlbum = null;
-		int i = 0;
-		boolean found = false;
+		Album theAlbum = albumByTitle(albumTitle);
+		AudioElement theElement = elementByTitle(elementTitle);
 
-		for (; i < albums.size(); i++) {
-			if (albums.get(i).getTitle().equalsIgnoreCase(albumTitle)) {
-				theAlbum = albums.get(i);
-				found = true;
-				break;
-			}
-		}
+		if (!(theElement instanceof Song))
+		    throw new NoElementFoundException("Element " + elementTitle + " exists, but is not a song");
 
-		if (found) {
-			AudioElement theElement = null;
-			for (AudioElement ae : elements) {
-				if (ae.getTitle().equalsIgnoreCase(elementTitle)) {
-					theElement = ae;
-					break;
-				}
-			}
-            if (theElement != null) {
-                theAlbum.addSong(theElement.getUUID());
-                //replace the album in the list
-                albums.set(i,theAlbum);
-            }
-            else throw new NoElementFoundException("Element " + elementTitle + " not found!");
-		}
-		else throw new NoAlbumFoundException("Album " + albumTitle + " not found!");
-
+		theAlbum.addSong(theElement.getUUID());
 	}
 
+	@Override
 	public void addElementToPlayList(String elementTitle, String playListTitle) throws NoPlayListFoundException, NoElementFoundException
 	{
-		PlayList thePlaylist = null;
-        int i = 0;
-		boolean found = false; 
+		PlayList thePlayList = playlistByTitle(playListTitle);
+		AudioElement theElement = elementByTitle(elementTitle);
 
-        for (; i < playlists.size(); i++) {
-			if (playlists.get(i).getTitle().equalsIgnoreCase(playListTitle)) {
-				thePlaylist = playlists.get(i);
-				found = true;
-				break;
-			}
-		}
-
-		if (found) {
-			AudioElement theElement = null;
-			for (AudioElement ae : elements) {
-				if (ae.getTitle().equalsIgnoreCase(elementTitle)) {
-					theElement = ae;
-					break;
-				}
-			}
-            if (theElement != null) {
-                thePlaylist.addElement(theElement.getUUID());
-                //replace the album in the list
-                playlists.set(i,thePlaylist);
-            }
-            else throw new NoElementFoundException("Element " + elementTitle + " not found!");
-
-		} else throw new NoPlayListFoundException("Playlist " + playListTitle + " not found!");
-
+		thePlayList.addElement(theElement.getUUID());
 	}
 
 	private void loadAlbums () {
@@ -292,14 +262,14 @@ public class ServerMusicHub implements IMusicHub {
 		}
 	}
 
+	@Override
 	public void save () {
 		this.saveElements();
 		this.saveAlbums();
 		this.savePlayLists();
 	}
 
-
-	public void saveAlbums () {
+	public void saveAlbums() {
 		Document document = xmlHandler.createXMLDocument();
 		if (document == null) return;
 
@@ -314,7 +284,7 @@ public class ServerMusicHub implements IMusicHub {
 		xmlHandler.createXMLFile(document, ALBUMS_FILE_PATH);
 	}
 
-	public void savePlayLists () {
+	public void savePlayLists() {
 		Document document = xmlHandler.createXMLDocument();
 		if (document == null) return;
 
@@ -348,4 +318,12 @@ public class ServerMusicHub implements IMusicHub {
 		}
 		xmlHandler.createXMLFile(document, ELEMENTS_FILE_PATH);
  	}
+
+	@Override
+	public DataHandler downloadElement(String title) throws NoElementFoundException {
+		AudioElement element = elementByTitle(title);
+		FileDataSource dataSource = new FileDataSource(element.getDataLocation());
+
+		return new DataHandler(dataSource);
+	}
 }

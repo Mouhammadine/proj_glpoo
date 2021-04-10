@@ -109,6 +109,5 @@ public class AudioBook extends AudioElement {
         audioBook.appendChild(categoryElement);
 		
 		parentElement.appendChild(audioBook);
-		return;
 	}
 }
