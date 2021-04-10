@@ -1,15 +1,17 @@
 package musichub.server;
 
 import musichub.business.*;
-import musichub.util.XMLHandler;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
 import javax.jws.WebService;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.File;
 import java.util.*;
 
 class SortByDate implements Comparator<Album>
@@ -33,27 +35,43 @@ class SortByAuthor implements Comparator<AudioElement>
 	} 
 }
 
+@XmlRootElement(name = "musichub")
 @WebService(endpointInterface = "musichub.business.IMusicHub")
 public class ServerMusicHub implements IMusicHub {
-	private final LinkedList<Album> albums;
-	private final LinkedList<PlayList> playlists;
-	private final LinkedList<AudioElement> elements;
-
 	public static final String DIR = System.getProperty("user.dir");
-	public static final String ALBUMS_FILE_PATH = DIR + "\\files\\albums.xml";
-	public static final String PLAYLISTS_FILE_PATH = DIR + "\\files\\playlists.xml";
-	public static final String ELEMENTS_FILE_PATH = DIR + "\\files\\elements.xml";
+	public static final String FILE_PATH = DIR + "musichub.xml";
 
-	private final XMLHandler xmlHandler = new XMLHandler();
+	@XmlElement(name = "album")
+	private List<Album> albums;
+	@XmlElement(name = "playlist")
+	private List<PlayList> playlists;
+	@XmlElement(name = "elements")
+	private List<AudioElement> elements;
+
+	public static ServerMusicHub load() {
+	    File file = new File(FILE_PATH);
+
+	    if (!file.exists()) {
+	    	System.err.println("No data found, create an empty MusicHub");
+	    	return new ServerMusicHub();
+		}
+
+	    try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(ServerMusicHub.class);
+			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+			return (ServerMusicHub) jaxbUnmarshaller.unmarshal(new File(FILE_PATH));
+		} catch (JAXBException e) {
+	    	System.err.println("Couldn't load data: " + e);
+	    	System.err.println("Create an empty MusicHub");
+	    	return new ServerMusicHub();
+		}
+	}
 
 	public ServerMusicHub () {
 		albums = new LinkedList<>();
 		playlists = new LinkedList<>();
 		elements = new LinkedList<>();
-
-		this.loadElements();
-		this.loadAlbums();
-		this.loadPlaylists();
 	}
 
 	@Override
@@ -199,125 +217,18 @@ public class ServerMusicHub implements IMusicHub {
 		thePlayList.addElement(theElement.getUUID());
 	}
 
-	private void loadAlbums () {
-		NodeList albumNodes = xmlHandler.parseXMLFile(ALBUMS_FILE_PATH);
-		if (albumNodes == null) return;
-
-		for (int i = 0; i < albumNodes.getLength(); i++) {
-			if (albumNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
-				Element albumElement = (Element) albumNodes.item(i);
-				if (albumElement.getNodeName().equals("album")) 	{
-					try {
-						this.addAlbum(new Album (albumElement));
-					} catch (Exception ex) {
-						System.out.println ("Something is wrong with the XML album element");
-					}
-				}
-			}  
-		}
-	}
-
-	private void loadPlaylists () {
-		NodeList playlistNodes = xmlHandler.parseXMLFile(PLAYLISTS_FILE_PATH);
-		if (playlistNodes == null) return;
-
-		for (int i = 0; i < playlistNodes.getLength(); i++) {
-			if (playlistNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
-				Element playlistElement = (Element) playlistNodes.item(i);
-				if (playlistElement.getNodeName().equals("playlist")) 	{
-					try {
-						this.addPlaylist(new PlayList (playlistElement));
-					} catch (Exception ex) {
-						System.out.println ("Something is wrong with the XML playlist element");
-					}
-				}
-			}  
-		}
-	}
-
-	private void loadElements () {
-		NodeList audioelementsNodes = xmlHandler.parseXMLFile(ELEMENTS_FILE_PATH);
-		if (audioelementsNodes == null) return;
-
-		for (int i = 0; i < audioelementsNodes.getLength(); i++) {
-			if (audioelementsNodes.item(i).getNodeType() == Node.ELEMENT_NODE)   {
-				Element audioElement = (Element) audioelementsNodes.item(i);
-				if (audioElement.getNodeName().equals("song")) 	{
-					try {
-						AudioElement newSong = new Song (audioElement);
-						this.addElement(newSong);
-					} catch (Exception ex) 	{
-						System.out.println ("Something is wrong with the XML song element");
-					}
-				}
-				if (audioElement.getNodeName().equals("audiobook")) 	{
-					try {
-						AudioElement newAudioBook = new AudioBook (audioElement);
-						this.addElement(newAudioBook);
-					} catch (Exception ex) 	{
-						System.out.println ("Something is wrong with the XML audiobook element");
-					}
-				}
-			}  
-		}
-	}
-
 	@Override
 	public void save () {
-		this.saveElements();
-		this.saveAlbums();
-		this.savePlayLists();
-	}
+	    try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(ServerMusicHub.class);
+			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
-	public void saveAlbums() {
-		Document document = xmlHandler.createXMLDocument();
-		if (document == null) return;
-
-		// root element
-		Element root = document.createElement("albums");
-		document.appendChild(root);
-
-		//save all albums
-		for (Album currentAlbum : this.albums()) {
-			currentAlbum.createXMLElement(document, root);
+			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			jaxbMarshaller.marshal(this, new File(FILE_PATH));
+		} catch(JAXBException e) {
+			System.err.println("Couldn't save data: " + e);
 		}
-		xmlHandler.createXMLFile(document, ALBUMS_FILE_PATH);
 	}
-
-	public void savePlayLists() {
-		Document document = xmlHandler.createXMLDocument();
-		if (document == null) return;
-
-		// root element
-		Element root = document.createElement("playlists");
-		document.appendChild(root);
-
-		//save all playlists
-        for (PlayList currentPlayList : this.playlists()) {
-			currentPlayList.createXMLElement(document, root);
-		}
-		xmlHandler.createXMLFile(document, PLAYLISTS_FILE_PATH);
-	}
-
-	public void saveElements() {
-		Document document = xmlHandler.createXMLDocument();
-		if (document == null) return;
-
-		// root element
-		Element root = document.createElement("elements");
-		document.appendChild(root);
-
-		//save all AudioElements
-		for (AudioElement currentElement : elements) {
-			if (currentElement instanceof Song) {
-				currentElement.createXMLElement(document, root);
-			}
-			if (currentElement instanceof AudioBook) {
-				currentElement.createXMLElement(document, root);
-			}
-		}
-		xmlHandler.createXMLFile(document, ELEMENTS_FILE_PATH);
- 	}
 
 	@Override
 	public DataHandler downloadElement(String title) throws NoElementFoundException {

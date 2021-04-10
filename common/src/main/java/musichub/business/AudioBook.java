@@ -1,8 +1,5 @@
 package musichub.business;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.UUID;
@@ -26,17 +23,7 @@ public class AudioBook extends AudioElement {
 		this.setLanguage(language);
 		this.setCategory(category);
 	}
-	
-	public AudioBook (Element xmlElement) throws Exception {
-		super(xmlElement);
-		try {
-			this.setLanguage(xmlElement.getElementsByTagName("language").item(0).getTextContent());
-			this.setCategory(xmlElement.getElementsByTagName("category").item(0).getTextContent());
-		} catch (Exception ex) {
-			throw ex;
-		}
-	}
-	
+
 	public Language getLanguage() {
 		return this.language;
 	}
@@ -87,27 +74,8 @@ public class AudioBook extends AudioElement {
 				break;
 		}
 	}
-	
-	
+
 	public String toString() {
 		return super.toString() + ", Language = " + getLanguage() + ", Category = " + getCategory() + "\n";
-	}
-	
-
-	public void createXMLElement(Document document, Element parentElement) {
-		// audiobook element
-        Element audioBook = document.createElement("audiobook");
-
-		super.createXMLElement(document, audioBook);
-		
-		Element languageElement = document.createElement("language");
-        languageElement.appendChild(document.createTextNode(language.getLanguage()));
-        audioBook.appendChild(languageElement);
-		
-		Element categoryElement = document.createElement("category");
-        categoryElement.appendChild(document.createTextNode(category.getCategory()));
-        audioBook.appendChild(categoryElement);
-		
-		parentElement.appendChild(audioBook);
 	}
 }

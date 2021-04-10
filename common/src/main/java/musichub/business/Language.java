@@ -9,7 +9,7 @@ public enum Language {
 
 	private String language;
 
-	private Language (String language) {
+	Language (String language) {
 		this.language = language;
 	}
 	public String getLanguage() {

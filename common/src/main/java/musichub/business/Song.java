@@ -1,8 +1,5 @@
 package musichub.business;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.UUID;
@@ -24,16 +21,7 @@ public class Song extends AudioElement {
 		super (title, artist, length, content);
 		this.setGenre(genre);
 	}
-	
-	public Song (Element xmlElement) throws Exception {
-		super(xmlElement);
-		try {
-			this.setGenre(xmlElement.getElementsByTagName("genre").item(0).getTextContent());
-		} catch (Exception ex) {
-			throw ex;
-		}
-	}
-	
+
 	public void setGenre (String genre) {	
 		switch (genre.toLowerCase()) {
 			case "jazz":
@@ -65,17 +53,4 @@ public class Song extends AudioElement {
 	public String toString() {
 		return super.toString() + ", Genre = " + getGenre() + "\n";
 	}	
-	
-	public void createXMLElement(Document document, Element parentElement) {
-		// song element
-        Element song = document.createElement("song");
-
-		super.createXMLElement(document, song);
-		
-		Element genreElement = document.createElement("genre");
-        genreElement.appendChild(document.createTextNode(genre.getGenre()));
-        song.appendChild(genreElement);
-		
-		parentElement.appendChild(song);
-	}
 }
