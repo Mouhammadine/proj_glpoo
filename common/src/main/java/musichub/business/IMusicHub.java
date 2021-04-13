@@ -6,9 +6,9 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 
 /**
- * Interface used to manage MusicHub data
+ * Interface used to manage MusicHub data<br>
  *
- * The interface is implemented by {@link musichub.server.ServerMusicHub} and used by client through JAX-WS
+ * The interface is implemented by server and used by client through JAX-WS
  */
 @WebService
 @SOAPBinding(style = SOAPBinding.Style.RPC)
@@ -34,24 +34,29 @@ public interface IMusicHub {
 	/**
 	 * Delete a playlist by his name
 	 * No order is guaranteed
+	 * @param playListTitle the title
+	 * @throws NoPlayListFoundException if the playlist doesn't exists
 	 */
 	@WebMethod void deletePlayList(String playListTitle) throws NoPlayListFoundException;
 
 	/**
 	 * Get a list of all albums
 	 * No order is guaranteed
+	 * @return all albums
 	 */
 	@WebMethod Album[] albums();
 
 	/**
 	 * Get a list of all playlists
 	 * No order is guaranteed
+     * @return all playlists
 	 */
 	@WebMethod PlayList[] playlists();
 
 	/**
 	 * Get a list of all elements (audiobooks / songs)
 	 * No order is guaranteed
+	 * @return all elements
 	 */
 	@WebMethod AudioElement[] elements();
 
@@ -134,6 +139,8 @@ public interface IMusicHub {
 	 Utility to download an element (song or audio book) from the server
 
 	 @param title Title of the element to download
+	 @return downloader
+	 @throws NoElementFoundException if the element doesn't exists
 	 */
 	@WebMethod DataHandler downloadElement(String title) throws NoElementFoundException;
 

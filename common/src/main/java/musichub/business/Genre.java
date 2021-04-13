@@ -1,5 +1,8 @@
 package musichub.business;
 
+/**
+ * Genre of a {@link Song}
+ */
 public enum Genre {
 	JAZZ,
 	CLASSIC,

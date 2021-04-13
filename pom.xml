@@ -8,7 +8,7 @@
     <packaging>pom</packaging>
 
     <name>MusicHub</name>
-    <description>Parent project for all BungeeCord modules.</description>
+    <description>Parent project for all MusicHub modules.</description>
     <inceptionYear>2021</inceptionYear>
 
     <developers>
@@ -70,18 +70,20 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <addOutputDirectory>false</addOutputDirectory>
                     <outputDirectory>${project.build.directory}/delombok</outputDirectory>
-                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.projectlombok</groupId>
-                        <artifactId>lombok</artifactId>
-                        <version>${lombok.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <quiet>true</quiet>
+                    <failOnWarnings>true</failOnWarnings>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

@@ -8,6 +8,9 @@ import javax.xml.ws.Service;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/**
+ * Client's main class
+ */
 public class Main {
 	public static void main(String[] args) throws MalformedURLException {
 		URL url = new URL("http://localhost:7779/ws/musichub?wsdl");

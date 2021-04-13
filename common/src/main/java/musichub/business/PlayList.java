@@ -8,11 +8,25 @@ import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.UUID;
 
+/**
+ * Class representing a play list<br>
+ *
+ * A play list is a set of {@link musichub.business.AudioElement}
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PlayList {
+	/**
+	 * Title of the play list
+	 */
 	@Getter private final String title;
+	/**
+	 * Unique id used to identify the play list
+	 */
 	@Getter private final UUID uuid;
 
+	/**
+	 * List of play list's elements
+	 */
 	@XmlElement(name = "elements")
 	@Getter private final ArrayList<UUID> elements;
 
@@ -26,6 +40,10 @@ public class PlayList {
 	    this("");
 	}
 
+	/**
+	 * Add an element to the play list
+	 * @param element the element
+	 */
 	public void addElement (UUID element)
 	{
 		elements.add(element);

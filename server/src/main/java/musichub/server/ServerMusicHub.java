@@ -35,19 +35,26 @@ class SortByAuthor implements Comparator<AudioElement>
 	} 
 }
 
+/**
+ * Implemention of music hub for server
+ */
 @XmlRootElement(name = "musichub")
 @WebService(endpointInterface = "musichub.business.IMusicHub")
 public class ServerMusicHub implements IMusicHub {
-	public static final String DIR = System.getProperty("user.dir");
-	public static final String FILE_PATH = DIR + "musichub.xml";
+	static final String DIR = System.getProperty("user.dir");
+	static final String FILE_PATH = DIR + "musichub.xml";
 
 	@XmlElement(name = "album")
-	private List<Album> albums;
+	private final List<Album> albums;
 	@XmlElement(name = "playlist")
-	private List<PlayList> playlists;
+	private final List<PlayList> playlists;
 	@XmlElement(name = "elements")
-	private List<AudioElement> elements;
+	private final List<AudioElement> elements;
 
+	/**
+	 * Load the music hub from the file. If the XML doesn't exists or is corrupted, an empty hub is created.
+	 * @return the create hub
+	 */
 	public static ServerMusicHub load() {
 	    File file = new File(FILE_PATH);
 
@@ -68,7 +75,7 @@ public class ServerMusicHub implements IMusicHub {
 		}
 	}
 
-	public ServerMusicHub () {
+	ServerMusicHub () {
 		albums = new LinkedList<>();
 		playlists = new LinkedList<>();
 		elements = new LinkedList<>();

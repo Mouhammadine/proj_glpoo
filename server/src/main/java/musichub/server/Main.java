@@ -5,6 +5,9 @@ import musichub.main.MusicTerminal;
 
 import javax.xml.ws.Endpoint;
 
+/**
+ * Servers' main class
+ */
 public class Main {
     public static void main(String[] args) {
         IMusicHub server = ServerMusicHub.load();

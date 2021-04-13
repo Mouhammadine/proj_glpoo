@@ -1,5 +1,8 @@
 package musichub.business;
 
+/**
+ * Category of a {@link musichub.business.AudioBook}
+ */
 public enum Category {
 	YOUTH,
 	NOVEL,

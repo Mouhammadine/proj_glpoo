@@ -1,18 +1,22 @@
 package musichub.business;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.util.UUID;
 
+/**
+ * Class representing an audio book in MusicHub
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Song extends AudioElement {
-	@Getter @Setter private final Genre genre;
+	/**
+	 * Genre of the song
+	 */
+	@Getter private final Genre genre;
 
 	public Song() {
-		super("", "", 0, UUID.randomUUID().toString(), "");
+		super("", "", 0, "");
 		this.genre = Genre.CLASSIC;
 	}
 

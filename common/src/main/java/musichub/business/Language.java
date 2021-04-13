@@ -2,6 +2,9 @@ package musichub.business;
 
 import lombok.AllArgsConstructor;
 
+/**
+ * Language of a {@link AudioBook}
+ */
 @AllArgsConstructor
 public enum Language {
 	FRENCH,

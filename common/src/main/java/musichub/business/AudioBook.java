@@ -4,15 +4,23 @@ import lombok.Getter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.util.UUID;
 
+/**
+ * Class representing an audio book in MusicHub
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AudioBook extends AudioElement {
+	/**
+	 * Language of the AudioBook
+	 */
 	@Getter private final Language language;
+	/**
+	 * Category of the AudioBook
+	 */
 	@Getter private final Category category;
 
 	public AudioBook () {
-		super("", "", 0, UUID.randomUUID().toString(), "");
+		super("", "", 0, "");
 		this.language = Language.ENGLISH;
 		this.category = Category.NOVEL;
 	}

@@ -10,8 +10,8 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
- * Interactive TTY application for MusicHub
- * This class is agnostic from the backend and can be used for client & server
+ * Interactive TTY application for MusicHub<br>
+ * This class is agnostic from the backend and can be used for client and server
  */
 public class MusicTerminal
 {
@@ -262,7 +262,7 @@ public class MusicTerminal
 
 	/**
 	 * Parse commands from standard input
-	 * @param ps1 Prompt to display before each commands (example: "> ")
+	 * @param ps1 Prompt to display before each commands (example: "$ ")
 	 */
 	public void parseCommands(String ps1) {
 		System.out.println("Type h for available commands");
