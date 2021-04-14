@@ -1,26 +1,25 @@
 package musichub.business;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import java.util.ArrayList;
 import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PlayList {
-	private String title;
-	private UUID uuid;
-	private ArrayList<UUID> elementUUIDs;
+	@Getter private final String title;
+	@Getter private final UUID uuid;
 
-	public PlayList (String title, String id, ArrayList<UUID> elementUUIDs) {
-		this.title = title;
-		this.uuid = UUID.fromString(id);
-		this.elementUUIDs = elementUUIDs;
-	}
-	
+	@XmlElement(name = "elements")
+	@Getter private final ArrayList<UUID> elements;
+
 	public PlayList (String title) {
 		this.title = title;
 		this.uuid = UUID.randomUUID();
-		this.elementUUIDs = new ArrayList<UUID>();
+		this.elements = new ArrayList<UUID>();
 	}
 
 	public PlayList () {
@@ -29,14 +28,6 @@ public class PlayList {
 
 	public void addElement (UUID element)
 	{
-		elementUUIDs.add(element);
-	}
-	
-	public ArrayList<UUID> getElements() {
-		return elementUUIDs;
-	}
-	
-	public String getTitle() {
-		return title;
+		elements.add(element);
 	}
 }

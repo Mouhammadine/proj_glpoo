@@ -152,7 +152,7 @@ public class ServerMusicHub implements IMusicHub {
 		for (int i = 0; i < songIDs.size(); i++) {
 			UUID id = songIDs.get(i);
 			for (AudioElement el : elements) {
-				if ((el instanceof Song) && el.getUUID().equals(id))
+				if ((el instanceof Song) && el.getUuid().equals(id))
 					songsInAlbum[i] = (Song) el;
 			}
 		}
@@ -205,7 +205,7 @@ public class ServerMusicHub implements IMusicHub {
 		if (!(theElement instanceof Song))
 		    throw new NoElementFoundException("Element " + elementTitle + " exists, but is not a song");
 
-		theAlbum.addSong(theElement.getUUID());
+		theAlbum.addSong(theElement.getUuid());
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class ServerMusicHub implements IMusicHub {
 		PlayList thePlayList = playlistByTitle(playListTitle);
 		AudioElement theElement = elementByTitle(elementTitle);
 
-		thePlayList.addElement(theElement.getUUID());
+		thePlayList.addElement(theElement.getUuid());
 	}
 
 	@Override

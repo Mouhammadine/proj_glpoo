@@ -1,19 +1,15 @@
 package musichub.business;
 
 public enum Genre {
-	JAZZ ("jazz"),
-	CLASSIC ("classic"),
-	HIPHOP ("hiphop"),
-	ROCK ("rock"),
-	POP("pop"),
-	RAP("rap");
+	JAZZ,
+	CLASSIC,
+	HIPHOP,
+	ROCK,
+	POP,
+	RAP;
 
-	private String genre;
-	Genre (String genre) {
-		this.genre = genre;
-	}
-
-	public String getGenre() {
-		return genre;
+	@Override
+	public String toString() {
+		return super.toString().toLowerCase();
 	}
 }

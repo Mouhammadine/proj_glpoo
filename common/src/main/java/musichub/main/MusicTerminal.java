@@ -4,6 +4,7 @@ import musichub.business.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -101,14 +102,14 @@ public class MusicTerminal
 			public void run() {
 				// add a new song
 				System.out.println("---- New song ----");
-				String title = prompt("Song title: ");
-				String genre = prompt("Song genre (jazz, classic, hiphop, rock, pop, rap): ");
-				String artist = prompt("Song artist: ");
-				int length = prompt_uint("Song length in seconds: ");
-				String content = prompt("Song content: ");
 
-				Song s = new Song(title, artist, length, content, genre);
-				hub.addElement(s);
+				hub.addElement(new Song(
+						prompt("Title: "),
+						prompt("Artist: "),
+						prompt_uint("Length in seconds: "),
+						prompt("Content: "),
+						prompt_enum("Genre", Genre.class)
+				));
 
 				System.out.println("New element list: ");
 				for (AudioElement el : hub.elements())
@@ -123,12 +124,12 @@ public class MusicTerminal
 			public void run() {
 				// add a new album
 				System.out.println("Enter a new album: ");
-				String aTitle = prompt("Album title: ");
-				String aArtist = prompt("Album artist: ");
-				int aLength = prompt_uint("Album length in seconds: ");
-				String aDate = prompt_date("Album date as YYYY-DD-MM: ");
-				Album a = new Album(aTitle, aArtist, aLength, aDate);
-				hub.addAlbum(a);
+				hub.addAlbum(new Album(
+						prompt("Title: "),
+						prompt("Artist: "),
+						prompt_uint("Length in seconds: "),
+						prompt_date("Date as YYYY-DD-MM: ")
+				));
 				System.out.println("New list of albums: ");
 
 				for (Album el : hub.albums())
@@ -170,13 +171,16 @@ public class MusicTerminal
 			public void run() {
 				// add a new audiobook
 				System.out.println("Enter a new audiobook: ");
-				String bTitle = prompt("AudioBook title: ");
-				String bCategory = prompt("AudioBook category (youth, novel, theater, documentary, speech)");
-				String bArtist = prompt("AudioBook artist: ");
-				int bLength = Integer.parseInt(prompt("AudioBook length in seconds: "));
-				String bContent = prompt("AudioBook content: ");
-				String bLanguage = prompt("AudioBook language (french, english, italian, spanish, german)");
-				AudioBook b = new AudioBook (bTitle, bArtist, bLength, bContent, bLanguage, bCategory);
+
+				AudioBook b = new AudioBook (
+					prompt("Title: "),
+					prompt("Artist: "),
+					prompt_uint("Length in seconds: "),
+					prompt("Content: "),
+					prompt_enum("AudioBook language", Language.class),
+					prompt_enum("Category", Category.class)
+				);
+
 				hub.addElement(b);
 				System.out.println("Audiobook created! New element list: ");
 
@@ -195,8 +199,7 @@ public class MusicTerminal
 				for (PlayList pl : hub.playlists())
 					System.out.println(pl.getTitle());
 
-				String playListTitle = prompt("Type the name of the playlist you wish to create:");
-				PlayList pl = new PlayList(playListTitle);
+				PlayList pl = new PlayList(prompt("New playlist name: "));
 				hub.addPlaylist(pl);
 				System.out.println("Available elements: ");
 
@@ -207,9 +210,9 @@ public class MusicTerminal
 				do {
 					String elementTitle = prompt("Type the name of the audio element you wish to add or 'n' to exit: ");	
 					try {
-						hub.addElementToPlayList(elementTitle, playListTitle);
+						hub.addElementToPlayList(elementTitle, pl.getTitle());
 					} catch (NoPlayListFoundException | NoElementFoundException ex) {
-						System.out.println (ex.getMessage());
+						System.out.println(ex.getMessage());
 					}
 
 					choice = prompt("Continue (Y/n)? ");
@@ -306,6 +309,34 @@ public class MusicTerminal
 		}
 	}
 
+	private <T extends Enum<T>> T prompt_enum(String prompt, Class<T> clazz) {
+	    StringBuilder bld = new StringBuilder();
+	    bld.append(prompt);
+	    bld.append(" [");
+
+	    boolean first = true;
+	    for (T c : clazz.getEnumConstants()) {
+	        if (first)
+	        	first = false;
+	        else
+	        	bld.append(", ");
+			bld.append(c);
+		}
+	    bld.append("]: ");
+	    prompt = bld.toString();
+
+
+		while (true) {
+		    String value = this.prompt(prompt);
+			for (T candidate : clazz.getEnumConstants()) {
+				if (candidate.toString().equalsIgnoreCase(value))
+					return candidate;
+			}
+
+			System.out.format("`%s` isn't valid", value);
+		}
+	}
+
 	private int prompt_uint(String ps1) {
 		while (true) {
 			String value = prompt(ps1);
@@ -321,13 +352,13 @@ public class MusicTerminal
 		}
 	}
 
-	private String prompt_date(String ps1) {
+	private Date prompt_date(String ps1) {
 		while (true) {
 			String value = prompt(ps1);
 
 			try {
-				sdf.parse(value);
-				return value;
+				Date date = sdf.parse(value);
+				return date;
 			} catch (ParseException e) {
 				System.out.println("Input isn't a valid date! Example: 2021-01-31");
 			}

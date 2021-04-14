@@ -1,19 +1,14 @@
 package musichub.business;
 
 public enum Category {
-	YOUTH ("youth"),
-	NOVEL("novel"),
-	THEATER("theater"),
-	DOCUMENTARY("documentary"),
-	SPEECH("speech");
+	YOUTH,
+	NOVEL,
+	THEATER,
+	DOCUMENTARY,
+	SPEECH;
 
-	private final String category;
-
-	Category (String category) {
-		this.category = category;
-	}
-
-	public String getCategory() {
-		return category;
+	@Override
+	public String toString() {
+		return super.toString().toLowerCase();
 	}
 }

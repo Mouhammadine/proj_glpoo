@@ -1,5 +1,7 @@
 package musichub.business;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -24,41 +26,23 @@ public class Album {
 		}
 	}
 
-	private String title;
-	private String artist;
-	private int lengthInSeconds;
-	private UUID uuid;
+	@Getter private final String title;
+	@Getter private final String artist;
+	@Getter private final int lengthInSeconds;
+	@Getter private final UUID uuid;
 
 	@XmlJavaTypeAdapter(DateAdapter.class)
-	private Date date;
+	@Getter private final Date date;
 
 	@XmlElement(name = "songs")
-	private List<UUID> songsUIDs;
+	@Getter private final List<UUID> songs = new ArrayList<>();
 
-	public Album(String title, String artist, int lengthInSeconds, String id, String date, ArrayList<UUID> songsUIDs) {
-		this.title = title;
-		this.artist = artist;
-		this.lengthInSeconds = lengthInSeconds;
-		this.uuid = UUID.fromString(id);
-		try {
-			this.date = DATE_FORMAT.parse(date);
-		} catch (ParseException ex) {
-			ex.printStackTrace();
-		}
-		this.songsUIDs = songsUIDs;
-	}
-
-	public Album (String title, String artist, int lengthInSeconds, String date) {
+	public Album (String title, String artist, int lengthInSeconds, Date date) {
 		this.title = title;
 		this.artist = artist;
 		this.lengthInSeconds = lengthInSeconds;
 		this.uuid = UUID.randomUUID();
-		try {
-			this.date = DATE_FORMAT.parse(date);
-		} catch (ParseException ex) {
-			ex.printStackTrace();
-		}
-		this.songsUIDs = new ArrayList<>();
+		this.date = date;
 	}
 
 	public Album() {
@@ -66,30 +50,17 @@ public class Album {
 		artist = "";
 		uuid = UUID.randomUUID();
 		date = new Date();
-		songsUIDs = new ArrayList<>();
+		lengthInSeconds = 0;
 	}
 
 	public void addSong (UUID song)
 	{
-		songsUIDs.add(song);
-	}
-	
-	
-	public List<UUID> getSongs() {
-		return songsUIDs;
+		songs.add(song);
 	}
 	
 	public List<UUID> getSongsRandomly() {
-		List<UUID> shuffledSongs = new ArrayList<>(this.songsUIDs);
+		List<UUID> shuffledSongs = new ArrayList<>(this.songs);
 		Collections.shuffle(shuffledSongs);
 		return shuffledSongs;
-	}
-	
-	public String getTitle() {
-		return title;
-	}
-	
-	public Date getDate() {
-		return date;
 	}
 }

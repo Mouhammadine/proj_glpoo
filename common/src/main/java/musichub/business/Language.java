@@ -1,18 +1,17 @@
 package musichub.business;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public enum Language {
-	FRENCH ("french"),
-	ENGLISH ("english"),
-	ITALIAN ("italian"),
-	SPANISH ("spanish"),
-	GERMAN("german");
+	FRENCH,
+	ENGLISH,
+	ITALIAN,
+	SPANISH,
+	GERMAN;
 
-	private String language;
-
-	Language (String language) {
-		this.language = language;
-	}
-	public String getLanguage() {
-		return language;
+	@Override
+	public String toString() {
+		return super.toString().toLowerCase();
 	}
 }

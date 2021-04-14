@@ -1,5 +1,7 @@
 package musichub.business;
 
+import lombok.Getter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSeeAlso;
@@ -11,11 +13,11 @@ import java.util.UUID;
 	AudioBook.class, Song.class
 })
 public abstract class AudioElement {
-	protected String  	title;
-	protected String 	artist;
-	protected int    	lengthInSeconds;
-	protected UUID    	uuid;
-	protected String	content;
+	@Getter protected final String  title;
+	@Getter protected final String 	artist;
+	@Getter protected final int    	lengthInSeconds;
+	@Getter protected final UUID    uuid;
+	@Getter protected final String	content;
 
 	public AudioElement (String title, String artist, int lengthInSeconds, String id, String content) {
 		this.title = title;
@@ -37,18 +39,7 @@ public abstract class AudioElement {
 		return new File(this.content);
 	}
 
-	public UUID getUUID() {
-		return this.uuid;
-	}
-	
-	public String getArtist() {
-		return this.artist;
-	}
-
-	public String getTitle() {
-		return this.title;
-	}
-	
+	@Override
 	public String toString() {
 		return "Title = " + this.title + ", Artist = " + this.artist + ", Length = " + this.lengthInSeconds + ", Content = " + this.content;
 	}
