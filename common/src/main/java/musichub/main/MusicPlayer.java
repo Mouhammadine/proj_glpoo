@@ -13,7 +13,10 @@ public class MusicPlayer {
     private final int BUFFER_SIZE = 128000;
     private final IMusicHub hub;
 
+    private int volume = 100;
+
     private BlockingQueue<String> elementsToPlay;
+    private SourceDataLine currentDataLine;
 
     public MusicPlayer(IMusicHub hub) {
         this.hub = hub;
@@ -25,6 +28,23 @@ public class MusicPlayer {
     public void queueMusic(String musicName) {
         this.elementsToPlay.add(musicName);
         System.out.println(musicName + " queued!");
+    }
+
+    public void setVolume(int volume) {
+        if (volume < 0)
+            volume = 0;
+        if (volume > 100)
+            volume = 100;
+
+        this.volume = volume;
+
+        if (this.currentDataLine != null)
+            dataLineSetVolume();
+    }
+
+    private void dataLineSetVolume() {
+        final FloatControl volumeControl = (FloatControl) currentDataLine.getControl( FloatControl.Type.MASTER_GAIN );
+        volumeControl.setValue(20.0f * (float) Math.log10(volume / 100.0f));
     }
 
     private void musicLoop() {
@@ -43,10 +63,12 @@ public class MusicPlayer {
             AudioFormat audioFormat = audioStream.getFormat();
 
             DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-            SourceDataLine sourceLine = (SourceDataLine) AudioSystem.getLine(info);
+            currentDataLine = (SourceDataLine) AudioSystem.getLine(info);
 
-            sourceLine.open(audioFormat);
-            sourceLine.start();
+            currentDataLine.open(audioFormat);
+            currentDataLine.start();
+
+            this.dataLineSetVolume();
 
             int nBytesRead = 0;
             byte[] abData = new byte[BUFFER_SIZE];
@@ -54,14 +76,16 @@ public class MusicPlayer {
                 nBytesRead = audioStream.read(abData, 0, abData.length);
 
                 if (nBytesRead >= 0) {
-                    sourceLine.write(abData, 0, nBytesRead);
+                    currentDataLine.write(abData, 0, nBytesRead);
                 }
             }
 
-            sourceLine.drain();
-            sourceLine.close();
+            currentDataLine.drain();
+            currentDataLine.close();
         } catch (NoElementFoundException | IOException | UnsupportedAudioFileException | LineUnavailableException e) {
             e.printStackTrace();
         }
+
+        currentDataLine = null;
     }
 }

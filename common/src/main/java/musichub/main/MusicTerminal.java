@@ -257,6 +257,14 @@ public class MusicTerminal
 			}
 		});
 
+		this.registerCommand(new Command("volume", "change playback volume") {
+			@Override
+			public void run() {
+				//delete a playlist
+				player.setVolume(prompt_uint("New volume (0-100): "));
+			}
+		});
+
 		if (isServer) {
 			this.registerCommand(new Command("save", "save elements, albums, playlists") {
 				@Override
