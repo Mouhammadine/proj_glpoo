@@ -18,10 +18,12 @@ public class MusicTerminal
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 	private final IMusicHub hub;
+	private final MusicPlayer player;
+
 	private Scanner scan;
 	private boolean should_quit;
 
-	private final LinkedHashMap<Character, Command> commands;
+	private final LinkedHashMap<String, Command> commands;
 
 	/**
 	 * Create a new Music Terminal from a hub
@@ -31,15 +33,16 @@ public class MusicTerminal
 	public MusicTerminal(IMusicHub hubInput, boolean isServer) {
 		this.commands = new LinkedHashMap<>();
 		this.hub = hubInput;
+		this.player = new MusicPlayer(hubInput);
 
-		this.registerCommand(new Command('h', "print this help message") {
+		this.registerCommand(new Command("h", "print this help message") {
 			@Override
 			public void run() {
 				printAvailableCommands();
 			}
 		});
 
-		this.registerCommand(new Command('t', "display the album titles, ordered by date") {
+		this.registerCommand(new Command("albums-by-date", "display the album titles, ordered by date") {
 			@Override
 			public void run() {
 				//album titles, ordered by date
@@ -47,7 +50,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('g', "display songs of an album, ordered by genre") {
+		this.registerCommand(new Command("albums-songs-genre", "display songs of an album, ordered by genre") {
 			@Override
 			public void run() {
 				//songs of an album, sorted by genre
@@ -64,7 +67,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('d', "display songs of an album") {
+		this.registerCommand(new Command("albums-songs", "display songs of an album") {
 			@Override
 			public void run() {
 				//songs of an album
@@ -81,7 +84,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('u', "display audiobooks ordered by author") {
+		this.registerCommand(new Command("audiobooks-by-author", "display audiobooks ordered by author") {
 			@Override
 			public void run() {
 				//audiobooks ordered by author
@@ -89,7 +92,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('m', "display all songs/audiobooks titles") {
+		this.registerCommand(new Command("elements", "display all songs/audiobooks titles") {
 			@Override
 			public void run() {
 				for (AudioElement el : hub.elements())
@@ -97,7 +100,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('c', "add a new song") {
+		this.registerCommand(new Command("song-create", "add a new song") {
 			@Override
 			public void run() {
 				// add a new song
@@ -119,7 +122,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('a', "add a new album") {
+		this.registerCommand(new Command("album-create", "add a new album") {
 			@Override
 			public void run() {
 				// add a new album
@@ -139,7 +142,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('+', "add a song to an album") {
+		this.registerCommand(new Command("album-add-song", "add a song to an album") {
 			@Override
 			public void run() {
 				//add a song to an album:
@@ -166,7 +169,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('l', "add a new audiobook") {
+		this.registerCommand(new Command("audiobook-create", "add a new audiobook") {
 			@Override
 			public void run() {
 				// add a new audiobook
@@ -189,7 +192,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('p', "create a new playlist from existing songs and audio books") {
+		this.registerCommand(new Command("playlist-create", "create a new playlist from existing songs and audio books") {
 			@Override
 			public void run() {
 				//create a new playlist from existing elements
@@ -222,7 +225,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command('-', "delete an existing playlist") {
+		this.registerCommand(new Command("playlist-delete", "delete an existing playlist") {
 			@Override
 			public void run() {
 				//delete a playlist
@@ -241,8 +244,21 @@ public class MusicTerminal
 			}
 		});
 
+		this.registerCommand(new Command("play", "play an element") {
+			@Override
+			public void run() {
+				//delete a playlist
+				System.out.println("Play an elemnt available elements:");
+
+				for (AudioElement p : hub.elements())
+					System.out.println(p.getTitle());
+
+				player.playMusic(prompt("Element name: "));
+			}
+		});
+
 		if (isServer) {
-			this.registerCommand(new Command('s', "save elements, albums, playlists") {
+			this.registerCommand(new Command("save", "save elements, albums, playlists") {
 				@Override
 				public void run() {
 					//save elements, albums, playlists
@@ -252,7 +268,7 @@ public class MusicTerminal
 			});
 		}
 
-		this.registerCommand(new Command('q', "quit program") {
+		this.registerCommand(new Command("quit", "quit program") {
 			@Override
 			public void run() {
 				should_quit = true;
@@ -277,8 +293,8 @@ public class MusicTerminal
 			if (choice.isEmpty())
 				continue;
 
-			if (commands.containsKey(choice.charAt(0))) {
-				commands.get(choice.charAt(0)).run();
+			if (commands.containsKey(choice)) {
+				commands.get(choice).run();
 			} else {
 				System.out.println("Unknown command. Type h for help");
 			}
@@ -294,7 +310,7 @@ public class MusicTerminal
 	 */
 	public void printAvailableCommands() {
 		for (Command command : this.commands.values()) {
-			System.out.format("%c: %s\n", command.name, command.description);
+			System.out.format("%s: %s\n", command.name, command.description);
 		}
 	}
 
@@ -370,10 +386,10 @@ public class MusicTerminal
 	}
 
 	private abstract class Command {
-		public char name;
+		public String name;
 		public String description;
 
-		public Command(char name, String description) {
+		public Command(String name, String description) {
 			this.name = name;
 			this.description = description;
 		}
