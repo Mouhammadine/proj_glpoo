@@ -9,15 +9,22 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Simple music player, that play music asynchronously.
+ */
 public class MusicPlayer {
     private final int BUFFER_SIZE = 128000;
     private final IMusicHub hub;
 
     private int volume = 100;
 
-    private BlockingQueue<String> elementsToPlay;
+    private final BlockingQueue<String> elementsToPlay;
     private SourceDataLine currentDataLine;
 
+    /**
+     * Create a new music player
+     * @param hub the hub, used to retrieve musics
+     */
     public MusicPlayer(IMusicHub hub) {
         this.hub = hub;
         this.elementsToPlay = new ArrayBlockingQueue<>(100);
@@ -25,11 +32,19 @@ public class MusicPlayer {
         new Thread(this::musicLoop).start();
     }
 
+    /**
+     * Add a music to player queue
+     * @param musicName music name
+     */
     public void queueMusic(String musicName) {
         this.elementsToPlay.add(musicName);
         System.out.println(musicName + " queued!");
     }
 
+    /**
+     * Change the playback volume
+     * @param volume Between 0 (muted) and 100
+     */
     public void setVolume(int volume) {
         if (volume < 0)
             volume = 0;

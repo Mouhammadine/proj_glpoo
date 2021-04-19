@@ -248,12 +248,54 @@ public class MusicTerminal
 			@Override
 			public void run() {
 				//delete a playlist
-				System.out.println("Play an elemnt available elements:");
+				System.out.println("Available elements:");
 
 				for (AudioElement p : hub.elements())
 					System.out.println(p.getTitle());
 
 				player.queueMusic(prompt("Element name: "));
+			}
+		});
+
+		this.registerCommand(new Command("album-play", "play an entire album") {
+			@Override
+			public void run() {
+				//delete a playlist
+				System.out.println("Available albums:");
+
+				for (Album p : hub.albums())
+					System.out.println(p.getTitle());
+
+				String albumName = prompt("Album name: ");
+
+				try {
+					for (Song music : hub.getAlbumSongs(albumName)) {
+						player.queueMusic(music.getTitle());
+					}
+				} catch (NoAlbumFoundException e) {
+					System.out.println("No album found with the requested title " + e.getMessage());
+				}
+			}
+		});
+
+		this.registerCommand(new Command("playlist-play", "play an entire playlist") {
+			@Override
+			public void run() {
+				//delete a playlist
+				System.out.println("Available playlists:");
+
+				for (PlayList p : hub.playlists())
+					System.out.println(p.getTitle());
+
+				String playlistName = prompt("Playlist name: ");
+
+				try {
+					for (AudioElement e : hub.getPlaylistElements(playlistName)) {
+						player.queueMusic(e.getTitle());
+					}
+				} catch (NoPlayListFoundException e) {
+					System.out.println("No playlist found with the requested title " + e.getMessage());
+				}
 			}
 		});
 

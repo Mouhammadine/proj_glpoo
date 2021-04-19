@@ -224,8 +224,32 @@ public class ServerMusicHub implements IMusicHub {
 		thePlayList.addElement(theElement.getUuid());
 	}
 
+	/**
+	 * Get playlist's elements. No order is guaranteed.
+	 *
+	 * @param playList title of the playlist
+	 * @return list of songs
+	 * @throws NoPlayListFoundException if the specified playlist doesn't exists
+	 */
 	@Override
-	public void save () {
+	public AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException {
+		PlayList thePlayList = playlistByTitle(playList);
+		AudioElement[] elementsInPlaylist = new Song[thePlayList.getElements().size()];
+
+		List<UUID> elementsIDs = thePlayList.getElements();
+		for (int i = 0; i < elementsIDs.size(); i++) {
+			UUID id = elementsIDs.get(i);
+			for (AudioElement el : elements) {
+				if (el.getUuid().equals(id))
+					elementsInPlaylist[i] = el;
+			}
+		}
+
+		return elementsInPlaylist;
+	}
+
+	@Override
+	public void save() {
 	    try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(ServerMusicHub.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

@@ -9,7 +9,8 @@ public enum Genre {
 	HIPHOP,
 	ROCK,
 	POP,
-	RAP;
+	RAP,
+	METAL;
 
 	@Override
 	public String toString() {

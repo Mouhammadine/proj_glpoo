@@ -103,7 +103,7 @@ public interface IMusicHub {
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
 	 */
-	@WebMethod Song[] getAlbumSongs (String albumTitle) throws NoAlbumFoundException;
+	@WebMethod Song[] getAlbumSongs(String albumTitle) throws NoAlbumFoundException;
 
 	/**
 	 * Get the album's songs, sorted by genre
@@ -111,7 +111,7 @@ public interface IMusicHub {
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
 	 */
-	@WebMethod Song[] getAlbumSongsSortedByGenre (String albumTitle) throws NoAlbumFoundException;
+	@WebMethod Song[] getAlbumSongsSortedByGenre(String albumTitle) throws NoAlbumFoundException;
 
 	/**
 	 Add a song to an album
@@ -134,6 +134,15 @@ public interface IMusicHub {
 	 @throws NoElementFoundException if the element doesn't exists
 	 */
 	@WebMethod void addElementToPlayList(String elementTitle, String playListTitle) throws NoPlayListFoundException, NoElementFoundException;
+
+	/**
+	 * Get playlist's elements. No order is guaranteed.
+	 *
+	 * @param playList title of the playlist
+	 * @return list of songs
+	 * @throws NoPlayListFoundException if the specified playlist doesn't exists
+	 */
+	@WebMethod AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException;
 
 	/**
 	 Utility to download an element (song or audio book) from the server
