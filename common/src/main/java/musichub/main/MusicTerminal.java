@@ -253,7 +253,7 @@ public class MusicTerminal
 				for (AudioElement p : hub.elements())
 					System.out.println(p.getTitle());
 
-				player.playMusic(prompt("Element name: "));
+				player.queueMusic(prompt("Element name: "));
 			}
 		});
 
