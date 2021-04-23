@@ -311,9 +311,7 @@ public class MusicTerminal
 			this.registerCommand(new Command("save", "save elements, albums, playlists") {
 				@Override
 				public void run() {
-					//save elements, albums, playlists
 					hub.save();
-					System.out.println("Elements, albums and playlists saved!");
 				}
 			});
 		}

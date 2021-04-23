@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.File;
 import java.util.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 class SortByDate implements Comparator<Album>
 {
@@ -41,6 +43,8 @@ class SortByAuthor implements Comparator<AudioElement>
 @XmlRootElement(name = "musichub")
 @WebService(endpointInterface = "musichub.business.IMusicHub")
 public class ServerMusicHub implements IMusicHub {
+	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 	static final String DIR = System.getProperty("user.dir");
 	static final String FILE_PATH = DIR + "musichub.xml";
 
@@ -59,18 +63,19 @@ public class ServerMusicHub implements IMusicHub {
 	    File file = new File(FILE_PATH);
 
 	    if (!file.exists()) {
-	    	System.err.println("No data found, create an empty MusicHub");
-	    	return new ServerMusicHub();
+			LOGGER.log(Level.INFO, "No data found, create an empty MusicHub");
+			return new ServerMusicHub();
 		}
 
 	    try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(ServerMusicHub.class);
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-			return (ServerMusicHub) jaxbUnmarshaller.unmarshal(new File(FILE_PATH));
+			ServerMusicHub output = (ServerMusicHub) jaxbUnmarshaller.unmarshal(new File(FILE_PATH));
+			LOGGER.log(Level.INFO, "MusicHub loaded from file");
+			return output;
 		} catch (JAXBException e) {
-	    	System.err.println("Couldn't load data: " + e);
-	    	System.err.println("Create an empty MusicHub");
+	    	LOGGER.log(Level.SEVERE, "Couldn't load data: " + e + ". Create an empty MusicHub.");
 	    	return new ServerMusicHub();
 		}
 	}
@@ -98,19 +103,9 @@ public class ServerMusicHub implements IMusicHub {
 
 	@Override
 	public void deletePlayList(String playListTitle) throws NoPlayListFoundException {
-
-		PlayList thePlayList = null;
-		boolean result = false;
-		for (PlayList pl : playlists) {
-			if (pl.getTitle().equalsIgnoreCase(playListTitle)) {
-				thePlayList = pl;
-				break;
-			}
-		}
-
-		if (thePlayList != null)
-			result = playlists.remove(thePlayList); 
-		if (!result) throw new NoPlayListFoundException("Playlist " + playListTitle + " not found!");
+	    PlayList thePlayList = this.playlistByTitle(playListTitle);
+		playlists.remove(thePlayList);
+		LOGGER.log(Level.INFO, "Remove playlist " + playListTitle);
 	}
 
 	@Override
@@ -182,6 +177,7 @@ public class ServerMusicHub implements IMusicHub {
 				return e;
 		}
 
+		LOGGER.log(Level.WARNING, "Couldn't find album " + title);
 		throw new NoAlbumFoundException("Album " + title + " not found!");
 	}
 
@@ -191,6 +187,7 @@ public class ServerMusicHub implements IMusicHub {
 			if (e.getTitle().equalsIgnoreCase(title))
 				return e;
 		}
+		LOGGER.log(Level.WARNING, "Couldn't find playlist " + title);
 		throw new NoPlayListFoundException("PlayList " + title + " not found!");
 	}
 
@@ -200,6 +197,7 @@ public class ServerMusicHub implements IMusicHub {
 			if (ae.getTitle().equalsIgnoreCase(title))
 				return ae;
 		}
+		LOGGER.log(Level.WARNING, "Couldn't find element " + title);
 		throw new NoElementFoundException("PlayList " + title + " not found!");
 	}
 
@@ -212,6 +210,7 @@ public class ServerMusicHub implements IMusicHub {
 		if (!(theElement instanceof Song))
 		    throw new NoElementFoundException("Element " + elementTitle + " exists, but is not a song");
 
+		LOGGER.log(Level.INFO, "Add song " + elementTitle + " to album " + albumTitle);
 		theAlbum.addSong(theElement.getUuid());
 	}
 
@@ -221,6 +220,7 @@ public class ServerMusicHub implements IMusicHub {
 		PlayList thePlayList = playlistByTitle(playListTitle);
 		AudioElement theElement = elementByTitle(elementTitle);
 
+		LOGGER.log(Level.INFO, "Add element " + elementTitle + " to playlist " + playListTitle);
 		thePlayList.addElement(theElement.getUuid());
 	}
 
@@ -256,14 +256,22 @@ public class ServerMusicHub implements IMusicHub {
 
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(this, new File(FILE_PATH));
+
+			LOGGER.log(Level.INFO, "Data saved");
 		} catch(JAXBException e) {
-			System.err.println("Couldn't save data: " + e);
+	        LOGGER.log(Level.SEVERE, "Couldn't save data: " + e);
 		}
 	}
 
 	@Override
 	public DataHandler downloadElement(String title) throws NoElementFoundException {
 		AudioElement element = elementByTitle(title);
+		File file = element.getDataLocation();
+
+		if (!file.exists()) {
+			LOGGER.log(Level.SEVERE, "Couldn't find audio element file: " + file);
+		}
+
 		FileDataSource dataSource = new FileDataSource(element.getDataLocation());
 
 		return new DataHandler(dataSource);
