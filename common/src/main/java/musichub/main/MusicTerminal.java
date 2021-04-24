@@ -48,7 +48,7 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command("albums-songs-by-genre", "display songs of an album, ordered by genre") {
+		this.registerCommand(new Command("album-songs-by-genre", "display songs of an album, ordered by genre") {
 			@Override
 			public void run() {
 				//songs of an album, sorted by genre
@@ -59,14 +59,14 @@ public class MusicTerminal
 				try {
 					displaySongs(hub.getAlbumSongsSortedByGenre(albumTitle));
 				} catch (NoAlbumFoundException ex) {
-					System.out.println("No album found with the requested title " + ex.getMessage());
+					System.out.println(ex.getMessage());
 				} catch (NoElementFoundException ex) {
 					System.out.println("An element of the album couldn't be found.");
 				}
 			}
 		});
 
-		this.registerCommand(new Command("albums-songs", "display songs of an album") {
+		this.registerCommand(new Command("album-songs", "display songs of an album") {
 			@Override
 			public void run() {
 				//songs of an album
@@ -77,7 +77,7 @@ public class MusicTerminal
 				try {
 				    displaySongs(hub.getAlbumSongs(albumTitle));
 				} catch (NoAlbumFoundException ex) {
-					System.out.println("No album found with the requested title " + ex.getMessage());
+					System.out.println(ex.getMessage());
 				} catch (NoElementFoundException ex) {
 					System.out.println("An element of the album couldn't be found.");
 				}
@@ -102,6 +102,30 @@ public class MusicTerminal
 			@Override
 			public void run() {
 			    displayElements(hub.elements());
+			}
+		});
+
+		this.registerCommand(new Command("playlists", "display all playlists") {
+			@Override
+			public void run() {
+				displayPlaylists(hub.playlists());
+			}
+		});
+
+		this.registerCommand(new Command("playlist-elements", "display elements of an playlist") {
+			@Override
+			public void run() {
+				System.out.println("Available playlist:");
+				displayPlaylists(hub.playlists());
+
+				String title  = prompt("Playlist name: ");
+				try {
+					displayElements(hub.getPlaylistElements(title));
+				} catch (NoPlayListFoundException ex) {
+					System.out.println(ex.getMessage());
+				} catch (NoElementFoundException ex) {
+					System.out.println("An element of the playlist couldn't be found.");
+				}
 			}
 		});
 
@@ -207,14 +231,14 @@ public class MusicTerminal
 
 				String choice;
 				do {
-					String elementTitle = prompt("Type the name of the audio element you wish to add or 'n' to exit: ");	
+					String elementTitle = prompt("Type the name of the audio element you wish to add: ");
 					try {
 						hub.addElementToPlayList(elementTitle, pl.getTitle());
 					} catch (NoPlayListFoundException | NoElementFoundException ex) {
 						System.out.println(ex.getMessage());
 					}
 
-					choice = prompt("Continue (Y/n)? ");
+					choice = prompt("Continue (Y/n)? ", true);
 				} while (choice.length() == 0 || choice.charAt(0) != 'n');
 
 				System.out.println("Playlist created!");
@@ -292,7 +316,7 @@ public class MusicTerminal
 						player.queueMusic(music.getTitle());
 					}
 				} catch (NoAlbumFoundException e) {
-					System.out.println("No album found with the requested title " + e.getMessage());
+					System.out.println(e.getMessage());
 				} catch (NoElementFoundException e) {
 					System.out.println("An element of the album couldn't be found.");
 				}
@@ -313,7 +337,7 @@ public class MusicTerminal
 						player.queueMusic(e.getTitle());
 					}
 				} catch (NoPlayListFoundException e) {
-					System.out.println("No playlist found with the requested title " + e.getMessage());
+					System.out.println(e.getMessage());
 				} catch (NoElementFoundException e) {
 					System.out.println("An element of the playlist couldn't be found.");
 				}
@@ -453,15 +477,24 @@ public class MusicTerminal
 		scan = null;
 	}
 
-	protected String prompt(String value) {
-		System.out.print(value);
-		try {
-			return this.scan.nextLine();
-		} catch (NoSuchElementException e) { // Ctrl+D
-			System.out.println();
-			System.exit(0);
-			return "";
+	protected String prompt(String value, boolean allowEmpty) {
+		while (true) {
+			System.out.print(value);
+			try {
+				String result = this.scan.nextLine().trim();
+
+				if (allowEmpty || !result.isEmpty())
+					return result;
+			} catch (NoSuchElementException e) { // Ctrl+D
+				System.out.println();
+				System.exit(0);
+				return "";
+			}
 		}
+	}
+
+	protected String prompt(String value) {
+	    return prompt(value, false);
 	}
 
 	protected <T extends Enum<T>> T prompt_enum(String prompt, Class<T> clazz) {
@@ -488,7 +521,7 @@ public class MusicTerminal
 					return candidate;
 			}
 
-			System.out.format("`%s` isn't valid", value);
+			System.out.format("`%s` isn't valid\n", value);
 		}
 	}
 
