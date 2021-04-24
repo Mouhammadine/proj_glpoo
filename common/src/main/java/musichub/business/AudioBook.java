@@ -19,13 +19,13 @@ public class AudioBook extends AudioElement {
 	 */
 	@Getter private final Category category;
 
-	public AudioBook () {
+	private AudioBook() {
 		super("", "", 0, "");
 		this.language = Language.ENGLISH;
 		this.category = Category.NOVEL;
 	}
 
-	public AudioBook (String title, String artist, int lengthInSeconds, String content, Language language, Category category) {
+	public AudioBook(String title, String artist, int lengthInSeconds, String content, Language language, Category category) {
 		super(title, artist, lengthInSeconds, content);
 
 		this.language = language;

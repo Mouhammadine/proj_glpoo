@@ -36,7 +36,7 @@ public class PlayList {
 		this.elements = new ArrayList<UUID>();
 	}
 
-	public PlayList () {
+	private PlayList () {
 	    this("");
 	}
 

@@ -15,7 +15,7 @@ public class Song extends AudioElement {
 	 */
 	@Getter private final Genre genre;
 
-	public Song() {
+	private Song() {
 		super("", "", 0, "");
 		this.genre = Genre.CLASSIC;
 	}
