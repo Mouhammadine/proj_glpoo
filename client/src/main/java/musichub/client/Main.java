@@ -13,12 +13,17 @@ import java.net.URL;
  */
 public class Main {
 	public static void main(String[] args) throws MalformedURLException {
-		URL url = new URL("http://localhost:7779/ws/musichub?wsdl");
+		String ip = "localhost";
+	    if (args.length > 1) {
+	    	ip = args[1];
+		}
+
+		URL url = new URL("http://" + ip + ":7779/ws/musichub?wsdl");
 		QName qname = new QName("http://server.musichub/", "ServerMusicHubService");
 
 		Service service = Service.create(url, qname);
 		IMusicHub musicHub = service.getPort(IMusicHub.class);
 
-		new MusicTerminal(musicHub, false).parseCommands("MusicHub-Client$ ");
+		new MusicTerminal(musicHub).parseCommands("MusicHub-Client$ ");
 	}
 }

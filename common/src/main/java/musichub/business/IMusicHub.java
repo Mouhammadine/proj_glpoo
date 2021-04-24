@@ -33,11 +33,24 @@ public interface IMusicHub {
 
 	/**
 	 * Delete a playlist by his name
-	 * No order is guaranteed
 	 * @param playListTitle the title
 	 * @throws NoPlayListFoundException if the playlist doesn't exists
 	 */
 	@WebMethod void deletePlayList(String playListTitle) throws NoPlayListFoundException;
+
+	/**
+	 * Delete an album by his name
+	 * @param albumTitle the title
+	 * @throws NoAlbumFoundException if the album doesn't exists
+	 */
+	@WebMethod void deleteAlbum(String albumTitle) throws NoAlbumFoundException;
+
+	/**
+	 * Delete an audioelement by his name
+	 * @param title the title
+	 * @throws NoElementFoundException if the album doesn't exists
+	 */
+	@WebMethod void deleteElement(String title) throws NoElementFoundException;
 
 	/**
 	 * Get a list of all albums
@@ -59,6 +72,20 @@ public interface IMusicHub {
 	 * @return all elements
 	 */
 	@WebMethod AudioElement[] elements();
+
+	/**
+	 * Get a list of all songs
+	 * No order is guaranteed
+	 * @return all songs
+	 */
+	@WebMethod Song[] songs();
+
+	/**
+	 * Get a list of all audiobooks
+	 * No order is guaranteed
+	 * @return all audiobooks
+	 */
+	@WebMethod AudioBook[] audioBooks();
 
 	/**
 	 * Get an album by his title
@@ -85,16 +112,16 @@ public interface IMusicHub {
 	@WebMethod AudioElement elementByTitle(String title) throws NoElementFoundException;
 
 	/**
-	 * Return a formatted string containing all albums sorted by release date
-	 * @return A formatted string. One line per album
+	 * Return all albums sorted by release date
+	 * @return all albums
 	 */
-	@WebMethod String getAlbumsTitlesSortedByDate();
+	@WebMethod Album[] getAlbumsSortedByDate();
 
 	/**
-	 * Return a formatted string containing all audiobooks sorted by author
-	 * @return A formatted string. One line per audiobook
+	 * Return all audiobooks by author
+	 * @return all audiobooks
 	 */
-	@WebMethod String getAudiobooksTitlesSortedByAuthor();
+	@WebMethod AudioBook[] getAudiobooksSortedByAuthor();
 
 	/**
 	 * Get the album's songs. No order is guaranteed.
@@ -103,7 +130,7 @@ public interface IMusicHub {
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
 	 */
-	@WebMethod Song[] getAlbumSongs(String albumTitle) throws NoAlbumFoundException;
+	@WebMethod Song[] getAlbumSongs(String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
 
 	/**
 	 * Get the album's songs, sorted by genre
@@ -111,7 +138,7 @@ public interface IMusicHub {
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
 	 */
-	@WebMethod Song[] getAlbumSongsSortedByGenre(String albumTitle) throws NoAlbumFoundException;
+	@WebMethod Song[] getAlbumSongsSortedByGenre(String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
 
 	/**
 	 Add a song to an album
@@ -142,7 +169,7 @@ public interface IMusicHub {
 	 * @return list of songs
 	 * @throws NoPlayListFoundException if the specified playlist doesn't exists
 	 */
-	@WebMethod AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException;
+	@WebMethod AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException, NoElementFoundException;
 
 	/**
 	 Utility to download an element (song or audio book) from the server

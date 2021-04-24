@@ -15,22 +15,21 @@ import java.util.Scanner;
  */
 public class MusicTerminal
 {
-	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	protected static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	private final IMusicHub hub;
-	private final MusicPlayer player;
+	protected final IMusicHub hub;
+	protected final MusicPlayer player;
 
-	private Scanner scan;
-	private boolean should_quit;
+	protected Scanner scan;
+	protected boolean should_quit;
 
-	private final LinkedHashMap<String, Command> commands;
+	protected final LinkedHashMap<String, Command> commands;
 
 	/**
 	 * Create a new Music Terminal from a hub
 	 * @param hubInput The hub (can be a client or a server)
-	 * @param isServer If isServer is true, add the commands specific to server, otherwise commands specific to client
 	 */
-	public MusicTerminal(IMusicHub hubInput, boolean isServer) {
+	public MusicTerminal(IMusicHub hubInput) {
 		this.commands = new LinkedHashMap<>();
 		this.hub = hubInput;
 		this.player = new MusicPlayer(hubInput);
@@ -42,27 +41,27 @@ public class MusicTerminal
 			}
 		});
 
-		this.registerCommand(new Command("albums-by-date", "display the album titles, ordered by date") {
+		this.registerCommand(new Command("albums", "display the albums, ordered by date") {
 			@Override
 			public void run() {
-				//album titles, ordered by date
-				System.out.println(hub.getAlbumsTitlesSortedByDate());
+				displayAlbums(hub.getAlbumsSortedByDate());
 			}
 		});
 
-		this.registerCommand(new Command("albums-songs-genre", "display songs of an album, ordered by genre") {
+		this.registerCommand(new Command("albums-songs-by-genre", "display songs of an album, ordered by genre") {
 			@Override
 			public void run() {
 				//songs of an album, sorted by genre
 				System.out.println("Songs of an album sorted by genre will be displayed; enter the album name, available albums are:");
-				System.out.println(hub.getAlbumsTitlesSortedByDate());
+				displayAlbums(hub.getAlbumsSortedByDate());
 
 				String albumTitle = prompt("Album name: ");
 				try {
-					for (Song s : hub.getAlbumSongsSortedByGenre(albumTitle))
-						System.out.println(s);
+					displaySongs(hub.getAlbumSongsSortedByGenre(albumTitle));
 				} catch (NoAlbumFoundException ex) {
 					System.out.println("No album found with the requested title " + ex.getMessage());
+				} catch (NoElementFoundException ex) {
+					System.out.println("An element of the album couldn't be found.");
 				}
 			}
 		});
@@ -72,31 +71,37 @@ public class MusicTerminal
 			public void run() {
 				//songs of an album
 				System.out.println("Available albums:");
-				System.out.println(hub.getAlbumsTitlesSortedByDate());
+				displayAlbums(hub.getAlbumsSortedByDate());
 
 				String albumTitle = prompt("Album name: ");
 				try {
-					for (Song s : hub.getAlbumSongs(albumTitle))
-						System.out.println(s);
+				    displaySongs(hub.getAlbumSongs(albumTitle));
 				} catch (NoAlbumFoundException ex) {
 					System.out.println("No album found with the requested title " + ex.getMessage());
+				} catch (NoElementFoundException ex) {
+					System.out.println("An element of the album couldn't be found.");
 				}
 			}
 		});
 
-		this.registerCommand(new Command("audiobooks-by-author", "display audiobooks ordered by author") {
+		this.registerCommand(new Command("audiobook", "display audiobooks ordered by author") {
 			@Override
 			public void run() {
-				//audiobooks ordered by author
-				System.out.println(hub.getAudiobooksTitlesSortedByAuthor());
+                displayAudiobooks(hub.getAudiobooksSortedByAuthor());
 			}
 		});
 
-		this.registerCommand(new Command("elements", "display all songs/audiobooks titles") {
+		this.registerCommand(new Command("songs", "display songs") {
 			@Override
 			public void run() {
-				for (AudioElement el : hub.elements())
-					System.out.println(el.getTitle());
+				displaySongs(hub.songs());
+			}
+		});
+
+		this.registerCommand(new Command("elements", "display all songs/audiobooks") {
+			@Override
+			public void run() {
+			    displayElements(hub.elements());
 			}
 		});
 
@@ -114,11 +119,10 @@ public class MusicTerminal
 						prompt_enum("Genre", Genre.class)
 				));
 
-				System.out.println("New element list: ");
-				for (AudioElement el : hub.elements())
-					System.out.println(el.getTitle());
-
 				System.out.println("Song created!");
+				System.out.println("New element list: ");
+
+				displayElements(hub.elements());
 			}
 		});
 
@@ -133,12 +137,10 @@ public class MusicTerminal
 						prompt_uint("Length in seconds: "),
 						prompt_date("Date as YYYY-DD-MM: ")
 				));
+				System.out.println("Album created!");
 				System.out.println("New list of albums: ");
 
-				for (Album el : hub.albums())
-					System.out.println(el.getTitle());
-
-				System.out.println("Album created!");
+				displayAlbums(hub.albums());
 			}
 		});
 
@@ -149,15 +151,12 @@ public class MusicTerminal
 				System.out.println("Add an existing song to an existing album");
 				System.out.println("Type the name of the song you wish to add. Available songs: ");
 
-				for (AudioElement ae : hub.elements())
-					if (ae instanceof Song)
-						System.out.println(ae.getTitle());
+				displaySongs(hub.songs());
 
 				String songTitle = prompt("Song name: ");
 
 				System.out.println("Type the name of the album you wish to enrich. Available albums: ");
-				for (Album el : hub.albums())
-					System.out.println(el.getTitle());
+				displayAlbums(hub.albums());
 
 				String titleAlbum = prompt("Album name: ");
 				try {
@@ -187,8 +186,7 @@ public class MusicTerminal
 				hub.addElement(b);
 				System.out.println("Audiobook created! New element list: ");
 
-				for (AudioElement el : hub.elements())
-					System.out.println(el.getTitle());
+				displayElements(hub.elements());
 			}
 		});
 
@@ -199,15 +197,13 @@ public class MusicTerminal
 				System.out.println("Add an existing song or audiobook to a new playlist");
 				System.out.println("Existing playlists:");
 
-				for (PlayList pl : hub.playlists())
-					System.out.println(pl.getTitle());
+				displayPlaylists(hub.playlists());
 
 				PlayList pl = new PlayList(prompt("New playlist name: "));
 				hub.addPlaylist(pl);
 				System.out.println("Available elements: ");
 
-				for (AudioElement ae : hub.elements())
-					System.out.println(ae.getTitle());
+				displayElements(hub.elements());
 
 				String choice;
 				do {
@@ -225,18 +221,45 @@ public class MusicTerminal
 			}
 		});
 
+		this.registerCommand(new Command("album-delete", "delete an existing album") {
+			@Override
+			public void run() {
+				System.out.println("Delete an existing album. Available albums:");
+
+				displayAlbums(hub.albums());
+
+				try {
+					hub.deleteAlbum(prompt("Album name: "));
+				} catch (NoAlbumFoundException ex) {
+					System.out.println (ex.getMessage());
+				}
+				System.out.println("Album deleted!");
+			}
+		});
+
+		this.registerCommand(new Command("element-delete", "delete an existing element") {
+			@Override
+			public void run() {
+				System.out.println("Delete an existing element. Available elements:");
+				displayElements(hub.elements());
+
+				try {
+					hub.deleteElement(prompt("Element name: "));
+				}	catch (NoElementFoundException ex) {
+					System.out.println (ex.getMessage());
+				}
+				System.out.println("Element deleted!");
+			}
+		});
+
 		this.registerCommand(new Command("playlist-delete", "delete an existing playlist") {
 			@Override
 			public void run() {
-				//delete a playlist
 				System.out.println("Delete an existing playlist. Available playlists:");
+				displayPlaylists(hub.playlists());
 
-				for (PlayList p : hub.playlists())
-					System.out.println(p.getTitle());
-
-				String plTitle = prompt("Playlist name: ");
 				try {
-					hub.deletePlayList(plTitle);
+					hub.deletePlayList("Playlist name: ");
 				}	catch (NoPlayListFoundException ex) {
 					System.out.println (ex.getMessage());
 				}
@@ -250,9 +273,7 @@ public class MusicTerminal
 				//delete a playlist
 				System.out.println("Available elements:");
 
-				for (AudioElement p : hub.elements())
-					System.out.println(p.getTitle());
-
+				displayElements(hub.elements());
 				player.queueMusic(prompt("Element name: "));
 			}
 		});
@@ -263,9 +284,7 @@ public class MusicTerminal
 				//delete a playlist
 				System.out.println("Available albums:");
 
-				for (Album p : hub.albums())
-					System.out.println(p.getTitle());
-
+				displayAlbums(hub.albums());
 				String albumName = prompt("Album name: ");
 
 				try {
@@ -274,6 +293,8 @@ public class MusicTerminal
 					}
 				} catch (NoAlbumFoundException e) {
 					System.out.println("No album found with the requested title " + e.getMessage());
+				} catch (NoElementFoundException e) {
+					System.out.println("An element of the album couldn't be found.");
 				}
 			}
 		});
@@ -283,9 +304,7 @@ public class MusicTerminal
 			public void run() {
 				//delete a playlist
 				System.out.println("Available playlists:");
-
-				for (PlayList p : hub.playlists())
-					System.out.println(p.getTitle());
+				displayPlaylists(hub.playlists());
 
 				String playlistName = prompt("Playlist name: ");
 
@@ -295,6 +314,8 @@ public class MusicTerminal
 					}
 				} catch (NoPlayListFoundException e) {
 					System.out.println("No playlist found with the requested title " + e.getMessage());
+				} catch (NoElementFoundException e) {
+					System.out.println("An element of the playlist couldn't be found.");
 				}
 			}
 		});
@@ -307,21 +328,100 @@ public class MusicTerminal
 			}
 		});
 
-		if (isServer) {
-			this.registerCommand(new Command("save", "save elements, albums, playlists") {
-				@Override
-				public void run() {
-					hub.save();
-				}
-			});
-		}
-
 		this.registerCommand(new Command("quit", "quit program") {
 			@Override
 			public void run() {
 				should_quit = true;
 			}
 		});
+	}
+
+	/**
+	 * Create a formatter for various displayer
+	 * @param columnNames Column names
+	 * @return The displayer
+	 */
+	public TableFormatter createFormatter(String... columnNames) {
+		return new TableFormatter(columnNames);
+	}
+
+	/**
+	 * Display a list of elements using a formatter
+	 * @param elements elements to display
+	 */
+	public void displayElements(AudioElement[] elements) {
+		TableFormatter formatter = createFormatter("Title", "Artist", "Duration");
+
+		for (AudioElement e : elements)
+			formatter.addLine(e.getTitle(), e.getArtist(), e.getLengthInSeconds());
+
+		formatter.display(System.out);
+	}
+
+	/**
+	 * Display a list of playlists using a formatter
+	 * @param elements elements to display
+	 */
+	public void displayPlaylists(PlayList[] elements) {
+		TableFormatter formatter = createFormatter("Title", "Element count");
+
+		for (PlayList e : elements)
+			formatter.addLine(e.getTitle(), e.getElements().size());
+
+		formatter.display(System.out);
+
+	}
+
+	/**
+	 * Display a list of albums using a formatter
+	 * @param elements elements to display
+	 */
+	public void displayAlbums(Album[] elements) {
+		TableFormatter formatter = createFormatter("Title", "Artist", "Date", "Duration", "Element count");
+
+		for (Album e : elements)
+			formatter.addLine(e.getTitle(), e.getArtist(), e.getDateStr(), e.getLengthInSeconds(), e.getSongs().size());
+
+		formatter.display(System.out);
+	}
+
+	/**
+	 * Display a list of songs using a formatter
+	 * @param elements elements to display
+	 */
+	public void displaySongs(Song[] elements) {
+		TableFormatter formatter = createFormatter("Title", "Artist", "Duration", "Genre");
+
+		for (Song e : elements)
+			formatter.addLine(e.getTitle(), e.getArtist(), e.getLengthInSeconds(), e.getGenre());
+
+		formatter.display(System.out);
+	}
+
+	/**
+	 * Display a list of audiobooks using a formatter
+	 * @param elements elements to display
+	 */
+	public void displayAudiobooks(AudioBook[] elements) {
+		TableFormatter formatter = createFormatter("Title", "Artist", "Duration", "Category", "Language");
+
+		for (AudioBook e : elements)
+			formatter.addLine(e.getTitle(), e.getArtist(), e.getLengthInSeconds(), e.getCategory(), e.getLanguage());
+
+		formatter.display(System.out);
+	}
+
+	/**
+	 * Print help using a formatter
+	 */
+	public void printAvailableCommands() {
+		TableFormatter formatter = createFormatter("Command", "Description");
+
+		for (Command command : this.commands.values()) {
+			formatter.addLine(command.name, command.description);
+		}
+
+		formatter.display(System.out);
 	}
 
 	/**
@@ -353,16 +453,7 @@ public class MusicTerminal
 		scan = null;
 	}
 
-	/**
-	 * Print terminal help
-	 */
-	public void printAvailableCommands() {
-		for (Command command : this.commands.values()) {
-			System.out.format("%s: %s\n", command.name, command.description);
-		}
-	}
-
-	private String prompt(String value) {
+	protected String prompt(String value) {
 		System.out.print(value);
 		try {
 			return this.scan.nextLine();
@@ -373,7 +464,7 @@ public class MusicTerminal
 		}
 	}
 
-	private <T extends Enum<T>> T prompt_enum(String prompt, Class<T> clazz) {
+	protected <T extends Enum<T>> T prompt_enum(String prompt, Class<T> clazz) {
 	    StringBuilder bld = new StringBuilder();
 	    bld.append(prompt);
 	    bld.append(" [");
@@ -401,7 +492,7 @@ public class MusicTerminal
 		}
 	}
 
-	private int prompt_uint(String ps1) {
+	protected int prompt_uint(String ps1) {
 		while (true) {
 			String value = prompt(ps1);
 
@@ -416,7 +507,7 @@ public class MusicTerminal
 		}
 	}
 
-	private Date prompt_date(String ps1) {
+	protected Date prompt_date(String ps1) {
 		while (true) {
 			String value = prompt(ps1);
 
@@ -429,11 +520,11 @@ public class MusicTerminal
 		}
 	}
 
-	private void registerCommand(Command cmd) {
+	protected void registerCommand(Command cmd) {
 		this.commands.put(cmd.name, cmd);
 	}
 
-	private abstract class Command {
+	protected abstract class Command {
 		public String name;
 		public String description;
 

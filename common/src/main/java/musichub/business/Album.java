@@ -1,6 +1,7 @@
 package musichub.business;
 
 import lombok.Getter;
+import lombok.NonNull;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -18,7 +19,7 @@ import java.util.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Album {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	private static class DateAdapter extends XmlAdapter<String, Date> {
 		@Override
@@ -61,7 +62,9 @@ public class Album {
 	@XmlElement(name = "songs")
 	@Getter private final List<UUID> songs = new ArrayList<>();
 
-	public Album (String title, String artist, int lengthInSeconds, Date date) {
+	public Album (@NonNull String title, @NonNull String artist, int lengthInSeconds, @NonNull Date date) {
+	    assert(lengthInSeconds >= 0);
+
 		this.title = title;
 		this.artist = artist;
 		this.lengthInSeconds = lengthInSeconds;
@@ -69,7 +72,7 @@ public class Album {
 		this.date = date;
 	}
 
-	public Album() {
+	private Album() {
 		title = "";
 		artist = "";
 		uuid = UUID.randomUUID();
@@ -81,9 +84,17 @@ public class Album {
 	 * Add a song to the album
 	 * @param song the song
 	 */
-	public void addSong(UUID song)
+	public void addSong(@NonNull UUID song)
 	{
 		songs.add(song);
+	}
+
+	/**
+	 * Get the formatted date
+	 * @return date in yyyy-MM-dd format
+	 */
+	public String getDateStr() {
+		return DATE_FORMAT.format(this.getDate());
 	}
 
 	/**
