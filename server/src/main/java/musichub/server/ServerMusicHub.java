@@ -1,5 +1,6 @@
 package musichub.server;
 
+import lombok.NonNull;
 import musichub.business.*;
 
 import javax.activation.DataHandler;
@@ -97,7 +98,7 @@ public class ServerMusicHub implements IMusicHub {
 		}
 	}
 
-	ServerMusicHub () {
+	public ServerMusicHub () {
 		albums = new LinkedList<>();
 		playlists = new LinkedList<>();
 		elements = new LinkedList<>();
@@ -236,7 +237,7 @@ public class ServerMusicHub implements IMusicHub {
 	}
 
 	@Override
-	public Album albumByTitle(String title) throws NoAlbumFoundException {
+	public Album albumByTitle(@NonNull String title) throws NoAlbumFoundException {
 	    Album e = albumsByName.getOrDefault(title.toLowerCase(), null);
 
 	    if (e != null)
@@ -247,7 +248,7 @@ public class ServerMusicHub implements IMusicHub {
 	}
 
 	@Override
-	public PlayList playlistByTitle(String title) throws NoPlayListFoundException {
+	public PlayList playlistByTitle(@NonNull String title) throws NoPlayListFoundException {
 		PlayList e = playlistByName.getOrDefault(title.toLowerCase(), null);
 
 		if (e != null)
@@ -258,7 +259,7 @@ public class ServerMusicHub implements IMusicHub {
 	}
 
 	@Override
-	public AudioElement elementByTitle(String title) throws NoElementFoundException {
+	public AudioElement elementByTitle(@NonNull String title) throws NoElementFoundException {
 		AudioElement e = elementsByName.getOrDefault(title.toLowerCase(), null);
 
 		if (e != null)
@@ -268,7 +269,7 @@ public class ServerMusicHub implements IMusicHub {
 		throw new NoElementFoundException("Element  " + title + " not found!");
 	}
 
-	public AudioElement elementById(UUID id) throws NoElementFoundException {
+	public AudioElement elementById(@NonNull UUID id) throws NoElementFoundException {
 		AudioElement e = elementsById.getOrDefault(id, null);
 
 		if (e != null)
@@ -304,7 +305,7 @@ public class ServerMusicHub implements IMusicHub {
 	@Override
 	public AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException, NoElementFoundException {
 		PlayList thePlayList = playlistByTitle(playList);
-		AudioElement[] elementsInPlaylist = new Song[thePlayList.getElements().size()];
+		AudioElement[] elementsInPlaylist = new AudioElement[thePlayList.getElements().size()];
 
 		List<UUID> elementsIDs = thePlayList.getElements();
 		for (int i = 0; i < elementsIDs.size(); i++) {
