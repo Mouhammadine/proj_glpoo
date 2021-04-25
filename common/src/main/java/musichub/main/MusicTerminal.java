@@ -2,6 +2,9 @@ package musichub.main;
 
 import musichub.business.*;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -139,9 +142,9 @@ public class MusicTerminal
 						prompt("Title: "),
 						prompt("Artist: "),
 						prompt_uint("Length in seconds: "),
-						prompt("Content: "),
+						"",
 						prompt_enum("Genre", Genre.class)
-				));
+				), prompt_file("File name: "));
 
 				System.out.println("Song created!");
 				System.out.println("New element list: ");
@@ -207,7 +210,9 @@ public class MusicTerminal
 					prompt_enum("Category", Category.class)
 				);
 
-				hub.addElement(b);
+				DataHandler handler = prompt_file("File name: ");
+
+				hub.addElement(b, handler);
 				System.out.println("Audiobook created! New element list: ");
 
 				displayElements(hub.elements());
@@ -537,6 +542,21 @@ public class MusicTerminal
 			} catch (NumberFormatException e) {
 				System.out.println("Input isn't a valid integer!");
 			}
+		}
+	}
+
+	protected DataHandler prompt_file(String ps1) {
+		while (true) {
+			File value = new File(prompt(ps1));
+
+			if (!value.exists())
+				System.out.println("Provided file doesn't exists!");
+			else if (!value.isDirectory())
+				System.out.println("Provided file is a directory!");
+			else if (!value.canRead())
+				System.out.println("We don't have read permission for this file!");
+			else
+				return new DataHandler(new FileDataSource(value));
 		}
 	}
 

@@ -36,11 +36,11 @@ public class ServerMusicHubPerfTest {
 
         hub = new ServerMusicHub();
 
-        hub.addElement(sg1);
-        hub.addElement(sg2);
-        hub.addElement(sg3);
-        hub.addElement(b1);
-        hub.addElement(b2);
+        hub.addElement(sg1, null);
+        hub.addElement(sg2, null);
+        hub.addElement(sg3, null);
+        hub.addElement(b1, null);
+        hub.addElement(b2, null);
 
         hub.addAlbum(alb1);
         hub.addAlbum(alb2);
@@ -49,7 +49,7 @@ public class ServerMusicHubPerfTest {
         hub.addPlaylist(pl2);
 
         for (int i = 0; i < 100000; i++)
-            hub.addElement(new Song("s" + i, "prolificArtist", 100, "f" + i, Genre.HIPHOP));
+            hub.addElement(new Song("s" + i, "prolificArtist", 100, "f" + i, Genre.HIPHOP), null);
     }
 
     @BeforeEach

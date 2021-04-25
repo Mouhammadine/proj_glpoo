@@ -16,8 +16,9 @@ public interface IMusicHub {
 	/**
 	 * Add a new audio element (song or audiobook)
 	 * @param element a complete audio element object
+     * @param handler audio data of the element
 	 */
-	@WebMethod void addElement(AudioElement element);
+	@WebMethod void addElement(AudioElement element, DataHandler handler);
 
 	/**
 	 * Add a new album

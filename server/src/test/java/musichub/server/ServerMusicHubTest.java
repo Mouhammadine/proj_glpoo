@@ -38,11 +38,11 @@ public class ServerMusicHubTest {
     public void initTest() {
         hub = new ServerMusicHub();
 
-        hub.addElement(sg1);
-        hub.addElement(sg2);
-        hub.addElement(sg3);
-        hub.addElement(b1);
-        hub.addElement(b2);
+        hub.addElement(sg1, null);
+        hub.addElement(sg2, null);
+        hub.addElement(sg3, null);
+        hub.addElement(b1, null);
+        hub.addElement(b2, null);
 
         hub.addAlbum(alb1);
         hub.addAlbum(alb2);
@@ -176,7 +176,7 @@ public class ServerMusicHubTest {
     public void testDeleteInserElement() throws NoElementFoundException {
         hub.deleteElement(b1.getTitle());
         Assertions.assertThrows(NoElementFoundException.class, () -> hub.elementByTitle(b1.getTitle()));
-        hub.addElement(b1);
+        hub.addElement(b1, null);
         Assertions.assertEquals(b1, hub.elementByTitle(b1.getTitle()));
     }
 

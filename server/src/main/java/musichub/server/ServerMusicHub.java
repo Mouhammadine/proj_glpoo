@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +50,8 @@ public class ServerMusicHub implements IMusicHub {
 	private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
 	static final String DIR = System.getProperty("user.dir");
-	static final String FILE_PATH = DIR + "musichub.xml";
+	static final String FILE_PATH = DIR + File.separator + "musichub.xml";
+	static final String DATA_PATH = DIR + File.separator + "data";
 
 	@XmlElement(name = "album")
 	private final List<Album> albums;
@@ -116,7 +118,14 @@ public class ServerMusicHub implements IMusicHub {
 	}
 
 	@Override
-	public void addElement(AudioElement element) {
+	public void addElement(AudioElement element, DataHandler handler) {
+		LOGGER.log(Level.INFO, "Upload audio element: " + element.getTitle());
+		try {
+			element.createFile(DATA_PATH, handler);
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, "Couldn't upload file: " + e);
+		}
+
 		elements.add(element);
 		elementsByName.put(element.getTitle().toLowerCase(), element);
 		elementsById.put(element.getUuid(), element);
@@ -124,12 +133,14 @@ public class ServerMusicHub implements IMusicHub {
 
 	@Override
 	public void addAlbum(Album album) {
+		LOGGER.log(Level.INFO, "Add album: " + album.getTitle());
 		albums.add(album);
 		albumsByName.put(album.getTitle().toLowerCase(), album);
 	}
 
 	@Override
 	public void addPlaylist(PlayList playlist) {
+		LOGGER.log(Level.INFO, "Add playlist: " + playlist.getTitle());
 		playlists.add(playlist);
 		playlistByName.put(playlist.getTitle().toLowerCase(), playlist);
 	}
