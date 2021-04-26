@@ -551,7 +551,7 @@ public class MusicTerminal
 
 			if (!value.exists())
 				System.out.println("Provided file doesn't exists!");
-			else if (!value.isDirectory())
+			else if (value.isDirectory())
 				System.out.println("Provided file is a directory!");
 			else if (!value.canRead())
 				System.out.println("We don't have read permission for this file!");

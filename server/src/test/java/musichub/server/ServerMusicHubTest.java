@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ServerMusicHubTest {
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private Song sg1 = new Song("Song1", "Artist1", 120, "unknownFile1", Genre.POP);
     private Song sg2 = new Song("Song2", "Artist1", 130, "unknownFile2", Genre.ROCK);
     private Song sg3 = new Song("Song3", "Artist2", 340, "unknownFile3", Genre.CLASSIC);
@@ -23,6 +27,8 @@ public class ServerMusicHubTest {
     private ServerMusicHub hub;
 
     public ServerMusicHubTest() {
+        LOGGER.setLevel(Level.OFF);
+
         this.alb1.addSong(sg1.getUuid());
         this.alb1.addSong(sg2.getUuid());
         this.alb2.addSong(sg3.getUuid());
