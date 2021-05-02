@@ -5,6 +5,15 @@ In order to build MusicHub, you need JDK 1.8 and Maven. Then, you can run:
 $ mvn build package
 ```
 
+# Create javadoc
+
+To build the JavaDoc of MusicHub you can run:
+```
+$ mvn javadoc:aggregate
+```
+
+Javadoc index will be at `target/site/apidocs/index.html`
+
 # Run server
 
 Server will use port 7779. In the current version, this port cannot be changed. Make sure this port is free then run:
