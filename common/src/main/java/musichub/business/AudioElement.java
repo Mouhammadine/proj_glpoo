@@ -68,6 +68,7 @@ public abstract class AudioElement {
 	 * Create the content file for this audio element from a data handler
 	 * @param dataPath The directory in which the file should stored
 	 * @param handler Input data
+	 * @throws IOException IO error when writing new file or reading input stream
 	 */
 	public void createFile(String dataPath, DataHandler handler) throws IOException {
 		if (handler == null)

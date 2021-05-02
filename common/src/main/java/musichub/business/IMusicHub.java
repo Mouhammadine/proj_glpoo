@@ -130,6 +130,7 @@ public interface IMusicHub {
 	 * @param albumTitle title of the album
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
+	 * @throws NoElementFoundException if an element of the album doesn't exists
 	 */
 	@WebMethod Song[] getAlbumSongs(String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
 
@@ -138,6 +139,7 @@ public interface IMusicHub {
 	 * @param albumTitle title of the album
 	 * @return list of songs
 	 * @throws NoAlbumFoundException if the specified album doesn't exists
+	 * @throws NoElementFoundException if an element of the album doesn't exists
 	 */
 	@WebMethod Song[] getAlbumSongsSortedByGenre(String albumTitle) throws NoAlbumFoundException, NoElementFoundException;
 
@@ -169,6 +171,7 @@ public interface IMusicHub {
 	 * @param playList title of the playlist
 	 * @return list of songs
 	 * @throws NoPlayListFoundException if the specified playlist doesn't exists
+     * @throws NoElementFoundException if an element of the playlist doesn't exists
 	 */
 	@WebMethod AudioElement[] getPlaylistElements(String playList) throws NoPlayListFoundException, NoElementFoundException;
 

@@ -9,6 +9,7 @@ public class LogFormatter extends Formatter {
     /**
      * Setup logger for MusicHub
      * @param fileHandler log output file; does nothing if null
+     * @throws IOException if the output file isn't accessible
      */
     public static void prepareLogger(String fileHandler) throws IOException {
         Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
