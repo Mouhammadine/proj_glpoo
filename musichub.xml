@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<musichub>
+    <album>
+        <title>The Great War</title>
+        <artist>Sabaton</artist>
+        <lengthInSeconds>2307</lengthInSeconds>
+        <uuid>a3d77cbc-d773-447b-badb-ff6e33b89dfb</uuid>
+        <date>2020-07-07</date>
+        <songs>dc91c230-a2ac-44d6-8d13-b009d2fcda0b</songs>
+        <songs>2446e2f7-075e-4f15-89e7-54baa3d9e312</songs>
+    </album>
+    <playlist>
+        <title>MyPlaylist</title>
+        <uuid>ec571bf8-e99c-462a-8a2a-5e3c5206cb8b</uuid>
+        <elements>dc91c230-a2ac-44d6-8d13-b009d2fcda0b</elements>
+        <elements>4c418146-c103-45de-9936-c7a2e766d363</elements>
+    </playlist>
+    <elements xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="song">
+        <title>Fields of Verdun</title>
+        <artist>Sabaton</artist>
+        <lengthInSeconds>360</lengthInSeconds>
+        <uuid>dc91c230-a2ac-44d6-8d13-b009d2fcda0b</uuid>
+        <content>data/dc91c230-a2ac-44d6-8d13-b009d2fcda0b.wav</content>
+        <genre>METAL</genre>
+    </elements>
+    <elements xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="song">
+        <title>Seven Pillars of Wisdom</title>
+        <artist>Sabaton</artist>
+        <lengthInSeconds>181</lengthInSeconds>
+        <uuid>2446e2f7-075e-4f15-89e7-54baa3d9e312</uuid>
+        <content>data/2446e2f7-075e-4f15-89e7-54baa3d9e312.wav</content>
+        <genre>METAL</genre>
+    </elements>
+    <elements xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="song">
+        <title>Piano Sonata No. 11, Alla turca</title>
+        <artist>Wolfang Amadeus Mozart</artist>
+        <lengthInSeconds>225</lengthInSeconds>
+        <uuid>4c418146-c103-45de-9936-c7a2e766d363</uuid>
+        <content>data/4c418146-c103-45de-9936-c7a2e766d363.wav</content>
+        <genre>CLASSIC</genre>
+    </elements>
+</musichub>
